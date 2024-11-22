@@ -1,11 +1,11 @@
 import os
-
 import openai
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
 from tabulate import tabulate
 import json
+import json_repair
 
 
 class StudyPlanner:
@@ -24,7 +24,8 @@ class StudyPlanner:
         """
         Pobiera plan zajęć na tydzień do przodu na podstawie numeru albumu z endpointa uczelnianego.
         """
-        start_date = datetime.now().strftime("%Y-%m-%d")
+        # od dnia jutrzejszego
+        start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
         end_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         params = {
             "number": album_number,
@@ -129,8 +130,11 @@ class StudyPlanner:
         Generuje harmonogram nauki przy użyciu modelu AI (ChatGPT).
         """
 
-        # filtrowanie wykładów z harmonogramu
+        curr_date = datetime.now().strftime("%Y-%m-%d")
+
+        # filtrowanie wykładów i zajęć z tego samego dnia z harmonogramu
         schedule_no_lectures = [entry for entry in schedule if entry['lesson_form'] != 'wykład']
+
 
         plan_text = "\n".join([
             f"{entry['subject']} | {entry['lesson_form']} | {entry['start_datetime'].strftime('%Y-%m-%d %H:%M')} - {entry['end_datetime'].strftime('%H:%M')}"
@@ -142,6 +146,9 @@ class StudyPlanner:
 
         # Aktualna data
         current_date = datetime.now().strftime("%Y-%m-%d")
+
+        # Aktualna godzina
+        current_time = datetime.now().strftime("%H:%M")
 
         time_preferences_text = "\n".join([f"- {tp['label']} od {tp['start']} do {tp['end']}" for tp in preferences['time_preferences']])
 
@@ -165,8 +172,10 @@ class StudyPlanner:
         {subject_topics_text or 'Brak'}
         
         **WAŻNE INSTRUKCJE:**
-        1. **Nie planuj nauki w weekendy (sobota i niedziela), jeśli użytkownik nie ma wolnego weekendu (wolny weekend: nie).** Absolutnie unikaj planowania sesji nauki na te dni.
-        2. Jeśli użytkownik ma wolny weekend (wolny weekend: tak), możesz planować naukę również w sobotę i niedzielę.
+        1. **Nie planuj nauki w soboty ani niedziele, jeśli użytkownik nie ma wolnego weekendu (wolny weekend: nie). **W takim przypadku dni nauki mogą być tylko od poniedziałku do piątku**.
+        2. Jeśli zajęcia odbywają się w poniedziałek, a dni od poniedziałku do piątku są już zaplanowane lub jest za późno na zaplanowanie nauki, zaplanuj naukę na niedzielę i umieść w odpowiednich polach "details" informację "nauka wymagana w niedzielę".
+        3. Jeśli użytkownik ma wolny weekend (wolny weekend: tak), możesz planować naukę również w sobotę i niedzielę.
+        4. Aktualna godzina to {current_time}, aktualna data to {current_date}, nie proponuj nauki dzisiaj na godziny wcześniejsze niż aktualna godzina. 
 
         Wygeneruj plan nauki jako listę obiektów JSON, gdzie każdy obiekt zawiera pola:
         - "subject": nazwa przedmiotu,
@@ -191,6 +200,7 @@ class StudyPlanner:
 
         Odpowiedz tylko w formacie JSON, bez dodatkowego tekstu.
         Upewnij się, że odpowiedź NIE zawiera znaczników bloków kodu ani innych dodatkowych znaków. Odpowiedz tylko czystym JSON-em.
+        Upewnij się, że odpowiedź jest poprawnym, walidowanym JSON-em. Usuń zbędne przecinki, zamknij listy i obiekty poprawnie.
         """
         
         self.last_prompt = prompt
@@ -218,6 +228,7 @@ class StudyPlanner:
         print(study_plan_json)  # Wyświetlenie surowych danych JSON
 
         try:
+
             study_plan_data = json.loads(study_plan_json)
 
             if isinstance(study_plan_data, dict) and 'study_plan' in study_plan_data:
