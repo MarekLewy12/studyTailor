@@ -20,7 +20,7 @@ const AppContent = () => {
         <CSSTransition
           key={location.key}
           classNames="page"
-          timeout={500} // animacja trwa 0.5s
+          timeout={500} // animacja trwa 0.5s (można zmienić tutaj czas)
         >
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />

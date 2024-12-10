@@ -3,7 +3,7 @@ import AnimatedSection from "../components/AnimatedSection";
 
 const CreatePage = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       <div className="container mx-auto py-10 px-4">
         {/* Nagłówek */}
         <AnimatedSection>
@@ -17,15 +17,13 @@ const CreatePage = () => {
           <div className="text-gray-800 text-center text-lg md:text-xl mb-8">
             <p className="mb-4">
               Aby stworzyć harmonogram, wprowadź swój numer albumu w poniższym
-              formularzu. Po wypełnieniu formularza otrzymasz dostęp do
-              spersonalizowanego harmonogramu, który pomoże Ci lepiej zarządzać
-              czasem.
+              formularzu. <br/><br/>Po wypełnieniu formularza otrzymasz dostęp do
+              spersonalizowanego harmonogramu, który pomoże Ci lepiej i efektywniej rozłożyć czas na naukę.
             </p>
-            <ul className="list-disc list-inside">
+            <ul className="list-disc list-inside text-orange-700">
               <li>Upewnij się, że numer albumu jest poprawny.</li>
-              <li>Wprowadź dane i zatwierdź formularz, aby przejść dalej.</li>
               <li>
-                Skorzystaj z narzędzi do optymalizacji swojego harmonogramu.
+                Odpowiadaj na pytania co do swoich preferencji.
               </li>
             </ul>
           </div>
