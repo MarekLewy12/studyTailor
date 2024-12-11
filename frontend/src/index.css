@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: "Lato", sans-serif;
+    background-color: #fbf2ee;
+}
+
+.navbar-bg {
+    background: #C04848;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #480048, #C04848);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #480048, #C04848); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+.stylized-text {
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Wejście strony */
+.page-enter {
+    opacity: 0;
+}
+
+/* Strona jest widoczna */
+.page-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in-out;
+}
+
+/* Wyjście strony */
+.page-exit {
+    opacity: 1;
+}
+
+/* Strona znika */
+.page-exit-active {
+    opacity: 0;
+    transition: opacity 500ms ease-in-out;
+}
