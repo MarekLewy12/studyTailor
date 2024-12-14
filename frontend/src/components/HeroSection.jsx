@@ -11,12 +11,15 @@ const HeroSection = () => {
       }}
     >
       {/* Logo */}
-      <div className="absolute pt-16 top-4 left-4 text-white text-2xl font-bold">
-        Nasze logo
-      </div>
+      <img
+          src="logo.png"
+            alt="Logo aplikacji"
+            className="absolute top-16 left-0 m-4 w-24 z-10"
+      >
+      </img>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
 
       {/* Content */}
       <div className="relative text-center text-white px-4">
