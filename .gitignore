@@ -179,7 +179,7 @@ pyrightconfig.json
 tests
 
 node_modules/
-package.json
-package-lock.json
+frontend/package.json
+frontend/package-lock.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python

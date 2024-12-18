@@ -41,3 +41,20 @@ body {
     opacity: 0;
     transition: opacity 500ms ease-in-out;
 }
+
+/* Dla animacji tekstu na HeroSection */
+.fade-enter {
+  opacity: 0;
+    position: absolute;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}

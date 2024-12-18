@@ -47,10 +47,14 @@ const MockSchedule = () => {
 
   return (
     <React.Fragment>
-      <h2 className="text-center mt-6 text-3xl">
-        Tak wygląda przykładowy harmonogram
-      </h2>
-      <ScheduleTable schedule={mockSchedule} />
+      <div className="text-center">
+        <h2 className="mt-6 text-3xl">Przykładowy harmonogram</h2>
+        <p className="text-gray-500">
+          Harmonogram jest scrollowalny na mniejszych ekranach, wystarczy
+          przewijać na boki
+        </p>
+        <ScheduleTable schedule={mockSchedule} />
+      </div>
     </React.Fragment>
   );
 };

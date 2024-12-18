@@ -16,11 +16,11 @@ function Navbar() {
   ];
 
   return (
-    <div className="fixed w-full navbar-bg text-white shadow-md z-40 h-16">
-      <div className="flex align-baseline justify-between p-5">
+    <div className="fixed w-full navbar-bg text-white shadow-md z-40">
+      <div className="flex items-center justify-between p-5 h-20">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          studyPlanner
+          <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />
         </Link>
 
         {/* Desktop Menu */}
@@ -29,7 +29,7 @@ function Navbar() {
             <li key={index}>
               <Link
                 to={item.dest}
-                className="text-lg hover:text-blue-300 transition-colors duration-300"
+                className="text-lg hover:text-orange-300 transition-colors duration-300"
               >
                 {item.name}
               </Link>
@@ -40,7 +40,7 @@ function Navbar() {
         {/* Mobile Menu Icon */}
         <div
           onClick={handleNav}
-          className="md:hidden cursor-pointer hover:text-blue-300 transition duration-300"
+          className="md:hidden cursor-pointer hover:text-orange-300 transition duration-300"
         >
           {nav ? <AiOutlineClose size={25} /> : <AiOutlineMenu size={25} />}
         </div>
@@ -55,9 +55,11 @@ function Navbar() {
         <div className="flex justify-between items-center border-b border-orange-700 p-4">
           <Link to="/" className="flex items-center">
             <img
-              src="/schedule_logo.png"
+              src="/logo.png"
               alt="Nasze logo"
-              className="h-12 w-auto mr-3"
+              // className="h-12 w-auto mr-3"
+              width={80}
+              height={80}
             />
           </Link>
           <AiOutlineClose
