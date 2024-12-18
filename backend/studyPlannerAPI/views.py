@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from rest_framework.parsers import JSONParser
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from studyPlannerAPI.models import ModelRequest
 from studyPlannerAPI.serializers import ModelRequestSerializer
@@ -48,3 +50,36 @@ def model_request_details(request, pk):
     if request.method == "GET":
         serializer = ModelRequestSerializer(model_request)
         return Response(serializer.data)
+
+
+# Rejestracja użytkownika
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return Response({"error": "Username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create_user(username=username, password=password)
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
+
+# Logowanie użytkownika
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = User.objects.filter(username=username).first()
+    if user is None or not user.check_password(password):
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    })
