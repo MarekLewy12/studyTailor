@@ -18,7 +18,7 @@ function Navbar() {
 
   return (
     <div className="fixed w-full navbar-bg text-white shadow-md z-40">
-      <div className="flex items-center justify-between p-5 h-20">
+      <div className="flex items-center justify-between p-5 h-16">
         {/* Logo */}
         {/*<Link to="/" className="flex items-center">*/}
         {/*  <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />*/}
@@ -30,7 +30,7 @@ function Navbar() {
             <li key={index}>
               <Link
                 to={item.dest}
-                className="text-lg hover:text-orange-300 transition-colors duration-300"
+                className="hover:text-orange-300 transition-colors duration-300"
               >
                 {item.name}
               </Link>
@@ -42,8 +42,8 @@ function Navbar() {
               className="
               inline-block
               text-lg
-              px-4
-              py-2
+              px-3
+              py-1
               rounded-full
               bg-gradient-to-r
               from-orange-400

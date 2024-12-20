@@ -17,12 +17,6 @@ const FAQSection = () => {
       answer:
         "Korzystanie z aplikacji pozwala na zautomatyzowanie tworzenia harmonogramów zajęć przez co w ciągu kilku sekund uzyskasz jasny i zrozumiały plan działania",
     },
-    {
-      question:
-        "Czy będę miał/miała dostęp do swojego harmonogramu na każdym urządzeniu?",
-      answer:
-        "Tak, aplikacja jest dostępna na każdym urządzeniu z dostępem do internetu. Wystarczy zalogować się na swoje konto, aby uzyskać dostęp do swojego harmonogramu.",
-    },
   ];
 
   return (
@@ -33,7 +27,7 @@ const FAQSection = () => {
       <div className="max-w-4xl mx-auto">
         {faqs.map((faq, index) => (
           <div key={index} className="mb-6">
-            <div className="bg-amber-100 p-3 rounded-2xl flex items-center justify-center">
+            <div className="border-2 border-amber-500 p-3 rounded-2xl flex items-center justify-center hover:bg-amber-100 transition duration-200">
               <h3 className="text-lg font-semibold text-black">
                 {faq.question}
               </h3>
