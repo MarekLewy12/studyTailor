@@ -56,7 +56,7 @@ const HeroSection = ({ scrollToFeatures }) => {
           </p>
           <div className="flex justify-center space-x-4">
             <Link
-              to="/create"
+              to="/register"
               className="bg-orange-600 hover:bg-orange-800 text-white font-semibold py-3 px-6 rounded-lg transition duration-300"
             >
               Zarejestruj swoje konto

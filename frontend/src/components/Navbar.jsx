@@ -17,10 +17,10 @@ function Navbar() {
 
   return (
     <div className="fixed w-full navbar-bg text-white shadow-md z-40">
-      <div className="flex items-center justify-between p-5 h-20">
+      <div className="flex items-center justify-between p-5 h-14">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />
+          <img src="/logo.png" alt="Logo aplikacji" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop Menu */}
@@ -58,8 +58,8 @@ function Navbar() {
               src="/logo.png"
               alt="Nasze logo"
               // className="h-12 w-auto mr-3"
-              width={80}
-              height={80}
+              width={60} // szerokość logo w trybie mobilnym
+              height={60} // wysokość logo w trybie mobilnym
             />
           </Link>
           <AiOutlineClose

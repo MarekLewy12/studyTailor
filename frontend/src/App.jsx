@@ -9,6 +9,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
+import RegisterPage from "./pages/RegisterPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -20,10 +21,11 @@ const AppContent = () => {
         <CSSTransition
           key={location.key}
           classNames="page"
-          timeout={500} // animacja trwa 0.5s (można zmienić tutaj czas)
+          timeout={300} // animacja przejścia na inną stronę trwa 0.3s (można zmienić tutaj czas)
         >
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/create" element={<CreatePage />} />
             <Route
               path="/my-schedules"
