@@ -11,20 +11,21 @@ function Navbar() {
 
   const navItems = [
     { name: "Strona główna", dest: "/" },
-    { name: "Stwórz harmonogram", dest: "/create" },
-    { name: "Moje harmonogramy", dest: "/my-schedules" },
+    // TODO: Elementy menu pojawiają się tylko kiedy użytkownik jest zalogowany
+    // { name: "Stwórz harmonogram", dest: "/create" },
+    // { name: "Moje harmonogramy", dest: "/my-schedules" },
   ];
 
   return (
     <div className="fixed w-full navbar-bg text-white shadow-md z-40">
       <div className="flex items-center justify-between p-5 h-20">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />
-        </Link>
+        {/*<Link to="/" className="flex items-center">*/}
+        {/*  <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />*/}
+        {/*</Link>*/}
 
         {/* Desktop Menu */}
-        <ul className="hidden md:flex space-x-8">
+        <ul className="hidden md:flex items-center justify-end space-x-8 w-full">
           {navItems.map((item, index) => (
             <li key={index}>
               <Link
@@ -35,6 +36,29 @@ function Navbar() {
               </Link>
             </li>
           ))}
+          <li>
+            <Link
+              to="/register"
+              className="
+              inline-block
+              text-lg
+              px-4
+              py-2
+              rounded-full
+              bg-gradient-to-r
+              from-orange-400
+              to-orange-600
+              transition
+              duration-300
+              shadow-md
+              hover:shadow-lg
+              transform
+              hover:scale-110
+            "
+            >
+              Rejestracja
+            </Link>
+          </li>
         </ul>
 
         {/* Mobile Menu Icon */}
