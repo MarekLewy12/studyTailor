@@ -17,10 +17,10 @@ function Navbar() {
 
   return (
     <div className="fixed w-full navbar-bg text-white shadow-md z-40">
-      <div className="flex items-center justify-between p-5 h-14">
+      <div className="flex items-center justify-between p-5 h-20">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/logo.png" alt="Logo aplikacji" className="h-12 w-auto" />
+          <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />
         </Link>
 
         {/* Desktop Menu */}
@@ -50,7 +50,7 @@ function Navbar() {
       <ul
         className={`${
           nav ? "left-0" : "-left-full"
-        } fixed top-0 bg-orange-950 text-white w-3/4 h-full transition-all duration-300 md:hidden`}
+        } fixed top-0 bg-orange-950 text-white w-1/2 h-full transition-all duration-300 md:hidden`}
       >
         <div className="flex justify-between items-center border-b border-orange-700 p-4">
           <Link to="/" className="flex items-center">

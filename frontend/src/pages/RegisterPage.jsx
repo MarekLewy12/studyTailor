@@ -68,6 +68,7 @@ const RegisterPage = () => {
           </form>
         </AnimatedSection>
       </div>
+      {/* TODO: Atrybucja */}
       <img
         src="/college_icon.png"
         alt="Ikona college"
