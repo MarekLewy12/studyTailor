@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -10,3 +11,7 @@ class ModelRequest(models.Model):
 
     class Meta:
         ordering = ["timestamp"]
+
+# Model studencki z numerem albumu
+class CustomUser(AbstractUser):
+    album_number = models.CharField(max_length=5, unique=True)

@@ -1,14 +1,16 @@
-from django.contrib.auth.models import User
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import JSONParser
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from studyPlannerAPI.models import ModelRequest
-from studyPlannerAPI.serializers import ModelRequestSerializer
+from studyPlannerAPI.models import ModelRequest, CustomUser
+from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
 
 from studyPlanner.services import StudyPlanner
+
+
 
 
 @api_view(["GET", "POST"])
@@ -52,22 +54,35 @@ def model_request_details(request, pk):
         return Response(serializer.data)
 
 
+
+
 # Rejestracja użytkownika
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     permission_classes = (permissions.AllowAny,)
+    serializer_class = RegisterSerializer
+
+    @swagger_auto_schema(
+        request_body=RegisterSerializer,
+        responses={201: TokenSerializer()},
+    )
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        if not username or not password:
-            return Response({"error": "Username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.create_user(username=username, password=password)
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
+        album_number = serializer.validated_data.get('album_number')
+
+        user = CustomUser.objects.create_user(username=username, password=password, album_number=album_number)
         refresh = RefreshToken.for_user(user)
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-        })
+        }, status=status.HTTP_201_CREATED)
 
 
 # Logowanie użytkownika
@@ -75,7 +90,9 @@ class RegisterView(generics.CreateAPIView):
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    user = User.objects.filter(username=username).first()
+    album_number = request.data.get('album_number')
+
+    user = CustomUser.objects.filter(username=username, album_number=album_number).first()
     if user is None or not user.check_password(password):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
     refresh = RefreshToken.for_user(user)
