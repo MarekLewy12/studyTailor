@@ -18,7 +18,10 @@ const RegisterPage = () => {
       });
       console.log(response.data); // Tutaj będą tokeny
 
-      // TODO 1: Zapisuj tokeny w localStorage
+      // Zapisanie do localstorage
+      localStorage.setItem("token", response.data.access);
+      localStorage.setItem("refreshToken", response.data.refresh);
+
       // TODO 2: Przekieruj użytkownika na stronę logowania i wyświetl mu komunikat o sukcesie
     } catch (error) {
       console.error(error);
