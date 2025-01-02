@@ -10,6 +10,9 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
 import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage.jsx";
+import MySchedulesPage from "./pages/MySchedulesPage.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 const AppContent = () => {
   const location = useLocation();
@@ -27,6 +30,8 @@ const AppContent = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/create" element={<CreatePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/my-schedules" element={<MySchedulesPage />} />
             <Route
               path="/my-schedules"
               element={<div>Moje harmonogramy</div>}
@@ -40,9 +45,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 

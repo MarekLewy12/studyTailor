@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [albumNumber, setAlbumNumber] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/...", {
+      const response = await axios.post("http://localhost:8000/register/", {
         username: login,
         password: password,
         album_number: albumNumber,
@@ -22,7 +23,12 @@ const RegisterPage = () => {
       localStorage.setItem("token", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
 
-      // TODO 2: Przekieruj użytkownika na stronę logowania i wyświetl mu komunikat o sukcesie
+      navigate("/login", {
+        state: {
+          message:
+            "Rejestracja zakończona pomyślnie. Możesz się teraz zalogować.",
+        },
+      });
     } catch (error) {
       console.error(error);
     }

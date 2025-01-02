@@ -1,19 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
   const [nav, setNav] = useState(false);
+  const { isAuthenticated, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleNav = () => {
     setNav(!nav);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    logout();
+    navigate("/");
+  };
+
   const navItems = [
     { name: "Strona główna", dest: "/" },
-    // TODO: Elementy menu pojawiają się tylko kiedy użytkownik jest zalogowany
-    // { name: "Stwórz harmonogram", dest: "/create" },
-    // { name: "Moje harmonogramy", dest: "/my-schedules" },
+    { name: "Logowanie", dest: "/login", auth: false },
+    { name: "Stwórz harmonogram", dest: "/create", auth: true },
+    { name: "Moje harmonogramy", dest: "/my-schedules", auth: true },
   ];
 
   return (
@@ -26,20 +36,26 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex items-center justify-end space-x-8 w-full">
-          {navItems.map((item, index) => (
-            <li key={index}>
-              <Link
-                to={item.dest}
-                className="hover:text-orange-300 transition-colors duration-300"
-              >
-                {item.name}
-              </Link>
-            </li>
-          ))}
-          <li>
-            <Link
-              to="/register"
-              className="
+          {navItems
+            .filter(
+              (item) =>
+                item.auth === undefined || item.auth === isAuthenticated,
+            )
+            .map((item, index) => (
+              <li key={index}>
+                <Link
+                  to={item.dest}
+                  className="hover:text-orange-300 transition-colors duration-300"
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          {isAuthenticated ? (
+            <li>
+              <button
+                onClick={handleLogout}
+                className="
               inline-block
               text-lg
               px-3
@@ -55,10 +71,35 @@ function Navbar() {
               transform
               hover:scale-110
             "
-            >
-              Rejestracja
-            </Link>
-          </li>
+              >
+                Wylogowanie
+              </button>
+            </li>
+          ) : (
+            <li>
+              <Link
+                to="/register"
+                className="
+              inline-block
+              text-lg
+              px-3
+              py-1
+              rounded-full
+              bg-gradient-to-r
+              from-orange-400
+              to-orange-600
+              transition
+              duration-300
+              shadow-md
+              hover:shadow-lg
+              transform
+              hover:scale-110
+            "
+              >
+                Rejestracja
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Mobile Menu Icon */}
