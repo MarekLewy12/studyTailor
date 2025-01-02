@@ -4,8 +4,7 @@
 
 body {
     font-family: "Poppins", sans-serif;
-    background-image: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
-    /*background-image: linear-gradient(to top, #d299c2 0%, #fef9d7 100%);*/
+    background-image: linear-gradient(-225deg, #E3FDF5 0%, #FFE6FA 100%);    /*background-image: linear-gradient(to top, #d299c2 0%, #fef9d7 100%);*/
     /*background-image: linear-gradient(45deg, #ee9ca7 0%, #ffdde1 100%);}*/
     }
 .navbar-bg {
