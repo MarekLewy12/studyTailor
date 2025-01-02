@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
@@ -33,79 +34,81 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="container mx-auto py-10 px-4 max-w-md">
-        {message && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-            {message}
-          </div>
-        )}
-        <div className="text-center mb-8">
-          <img
-            src="/logo.png"
-            alt="Logo aplikacji"
-            className="mx-auto h-32 w-auto mb-4"
-          />
-          <h1 className="text-3xl md:text-4xl font-bold text-orange-600">
-            Logowanie
-          </h1>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="username"
-            >
-              Login
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="username"
-              type="text"
-              placeholder="Login"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+        <AnimatedSection>
+          {message && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+              {message}
+            </div>
+          )}
+          <div className="text-center mb-8">
+            <img
+              src="/study_logo_orange_no_text.png"
+              alt="Logo aplikacji"
+              className="mx-auto h-32 w-auto mb-4"
             />
+            <h1 className="text-3xl md:text-4xl font-bold text-orange-600">
+              Logowanie
+            </h1>
           </div>
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="password"
-            >
-              Hasło
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
-              placeholder="Hasło"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="albumNumber"
-            >
-              Numer albumu
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="albumNumber"
-              type="text"
-              placeholder="Numer albumu"
-              value={albumNumber}
-              onChange={(e) => setAlbumNumber(e.target.value)}
-            />
-          </div>
-          <div className="text-center">
-            <button
-              type="submit"
-              className="bg-orange-600 hover:bg-orange-800 text-white font-semibold py-2 px-6 rounded-lg transition duration-300"
-            >
-              Zaloguj się
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="username"
+              >
+                Login
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="username"
+                type="text"
+                placeholder="Login"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="password"
+              >
+                Hasło
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="password"
+                type="password"
+                placeholder="Hasło"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="albumNumber"
+              >
+                Numer albumu
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="albumNumber"
+                type="text"
+                placeholder="Numer albumu"
+                value={albumNumber}
+                onChange={(e) => setAlbumNumber(e.target.value)}
+              />
+            </div>
+            <div className="text-center">
+              <button
+                type="submit"
+                className="bg-orange-600 hover:bg-orange-800 text-white font-semibold py-2 px-6 rounded-lg transition duration-300"
+              >
+                Zaloguj się
+              </button>
+            </div>
+          </form>
+        </AnimatedSection>
       </div>
     </div>
   );

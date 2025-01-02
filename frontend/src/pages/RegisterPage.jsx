@@ -39,13 +39,13 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      <div className="container mx-auto py-10 px-4 max-w-md">
+      <div className="container mx-auto py-12 px-4 max-w-md">
         <AnimatedSection>
           <div className="text-center mb-8">
             <img
-              src="/logo.png"
+              src="/study_logo_orange_no_text.png"
               alt="Logo aplikacji"
-              className="mx-auto h-32 w-auto mb-4"
+              className="mx-auto h-32 w-auto mb-4 mt-5"
             />
             <h1 className="text-3xl md:text-4xl font-bold text-orange-600">
               Witaj w studyTailor

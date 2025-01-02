@@ -21,11 +21,7 @@ const AppContent = () => {
     <div className="app">
       <Navbar />
       <TransitionGroup>
-        <CSSTransition
-          key={location.key}
-          classNames="page"
-          timeout={300} // animacja przejścia na inną stronę trwa 0.3s (można zmienić tutaj czas)
-        >
+        <CSSTransition key={location.key} classNames="page">
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/register" element={<RegisterPage />} />
