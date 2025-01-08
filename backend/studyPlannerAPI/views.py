@@ -25,9 +25,8 @@ def model_requests_list(request):
 
         planner = StudyPlanner()
         schedule = planner.get_schedule(data["album_number"])
-        # subjects = planner.display_subjects(schedule)
-        # preferences = planner.get_user_preferences(subjects)
-        preferences = None
+
+        preferences = data.get("preferences", {})
         study_plan = planner.generate_study_plan(schedule, preferences)
 
         data["model"] = planner.model
