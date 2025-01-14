@@ -15,17 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
 from django.urls import path, include
-from rest_framework import permissions
+from rest_framework.documentation import include_docs_urls
+from studyPlannerAPI import views
+from studyPlannerAPI.views import root_view
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Study Planner API",
+        title="StudyTailor API",
         default_version="v1",
-        description="API for Study Planner",
+        description="API do generowania planów nauki",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@studyplanner.local"),
         license=openapi.License(name="BSD License"),
@@ -35,8 +37,12 @@ schema_view = get_schema_view(
     )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("studyPlannerAPI.urls")),
+    path('register/', views.RegisterView.as_view(), name='register'),
+    path('login/', views.login_view, name='login'),
+    path("", root_view, name='api-root'),
+    path("requests/<int:pk>/", views.model_request_details),
+    # Dokumentacja Swagger
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

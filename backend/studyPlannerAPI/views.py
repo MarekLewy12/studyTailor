@@ -10,7 +10,20 @@ from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializ
 
 from studyPlanner.services import StudyPlanner
 
-
+@api_view(['GET'])
+def root_view(request):
+    """
+    Widok głównej strony API.
+    """
+    return Response({
+        'message': 'Witaj w API StudyTailor',
+        'endpoints': {
+            'generowanie_planu': '/',
+            'rejestracja': '/register/',
+            'logowanie': '/login/',
+            'dokumentacja': '/docs/'
+        }
+    })
 
 
 @api_view(["GET", "POST"])
