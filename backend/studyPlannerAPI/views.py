@@ -15,6 +15,12 @@ from studyPlanner.services import StudyPlanner
 
 @api_view(["GET", "POST"])
 def model_requests_list(request):
+    """
+    Lista wszystkich żądań modelu lub utworzenie nowego żądania modelu
+
+    GET: Zwraca listę wszystkich żądań modelu
+    POST: Tworzy nowe żądanie modelu
+    """
     if request.method == "GET":
         model_requests = ModelRequest.objects.all()
         serializer = ModelRequestSerializer(model_requests, many=True)
