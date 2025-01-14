@@ -27,3 +27,7 @@ tqdm==4.67.1
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+drf-yasg==1.21.7
