@@ -5,7 +5,6 @@ import requests
 from datetime import datetime, timedelta
 from tabulate import tabulate
 import json
-import json_repair
 
 
 class StudyPlanner:
