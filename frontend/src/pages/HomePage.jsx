@@ -9,7 +9,14 @@ const HomePage = () => {
   const featuresRef = useRef(null);
 
   const scrollToFeatures = () => {
-    featuresRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (featuresRef.current) {
+      const yOffset = -80;
+      const element = featuresRef.current;
+      const y =
+        element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
   };
 
   return (
@@ -18,7 +25,10 @@ const HomePage = () => {
       <HeroSection scrollToFeatures={scrollToFeatures} />
 
       {/* Features (funkcje naszej aplikacji) */}
-      <FeaturesSection ref={featuresRef} />
+
+      <div id="features" ref={featuresRef}>
+        <FeaturesSection />
+      </div>
 
       <div className="container mx-auto py-10 px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

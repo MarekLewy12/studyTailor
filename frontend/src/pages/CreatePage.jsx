@@ -3,6 +3,7 @@ import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import ScheduleTable from "../components/ScheduleTable";
 import { ClipLoader } from "react-spinners";
+import {API_BASE_URL} from "../config.js";
 
 const CreatePage = () => {
   const [albumNumber, setAlbumNumber] = useState(""); // Stan dla numeru albumu
@@ -18,7 +19,7 @@ const CreatePage = () => {
     setSchedule(null); // Wyczyść harmonogram
 
     try {
-      const response = await axios.post("http://localhost:8000", {
+      const response = await axios.post(`${API_BASE_URL}`, {
         album_number: albumNumber,
       });
 

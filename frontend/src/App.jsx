@@ -12,7 +12,9 @@ import CreatePage from "./pages/CreatePage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage.jsx";
 import MySchedulesPage from "./pages/MySchedulesPage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -28,6 +30,7 @@ const AppContent = () => {
             <Route path="/create" element={<CreatePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/my-schedules" element={<MySchedulesPage />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route
               path="/my-schedules"
               element={<div>Moje harmonogramy</div>}

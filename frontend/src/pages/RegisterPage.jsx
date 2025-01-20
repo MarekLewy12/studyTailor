@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import {API_BASE_URL} from "../config.js";
 
 const RegisterPage = () => {
   const [login, setLogin] = useState("");
@@ -12,7 +13,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/register/", {
+      const response = await axios.post(`${API_BASE_URL}/register/`, {
         username: login,
         password: password,
         album_number: albumNumber,

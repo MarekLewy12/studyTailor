@@ -1,61 +1,71 @@
 import React from "react";
-import ScheduleTable from "./ScheduleTable";
+import ScheduleCalendar from "./ScheduleCalendar";
 
 const MockSchedule = () => {
+  // Funkcja pomocnicza do generowania dat
+  const getDateString = (daysToAdd = 0) => {
+    const date = new Date();
+    date.setDate(date.getDate() + daysToAdd);
+    return date.toISOString().split("T")[0];
+  };
+
   const mockSchedule = [
     {
       subject: "Zarządzanie informacją 2",
-      lesson_form: "przygotowanie do laboratoriów",
-      study_day: "2024-12-02",
-      study_time: "20:00 - 21:30",
-      details: "Brak szczegółów",
-      class_time: "2024-12-03 10:30 - 12:00",
+      lesson_form: "Przygotowanie do laboratoriów",
+      study_day: getDateString(0),
+      study_time: "10:00 - 11:30",
+      details: "Przygotowanie prezentacji na temat systemów CMS",
+      class_time: "14:15 - 15:45",
     },
     {
       subject: "Sieci komputerowe",
-      lesson_form: "przygotowanie do laboratoriów",
-      study_day: "2024-12-02",
-      study_time: "21:30 - 22:30",
-      details: "Brak szczegółów",
-      class_time: "2024-12-03 14:15 - 16:00",
+      lesson_form: "Przygotowanie do egzaminu",
+      study_day: getDateString(0),
+      study_time: "14:00 - 16:00",
+      details: "Konfiguracja routera i protokoły sieciowe",
+      class_time: "8:15 - 9:45",
     },
     {
-      subject: "Inżynierski projekt zespołowy 1",
-      lesson_form: "przygotowanie do projektu",
-      study_day: "2024-12-03",
-      study_time: "08:00 - 09:30",
-      details: "Brak szczegółów",
-      class_time: "2024-12-04 08:30 - 11:30",
+      subject: "Inżynierski projekt zespołowy",
+      lesson_form: "Praca nad projektem",
+      study_day: getDateString(1),
+      study_time: "09:00 - 11:00",
+      details: "Implementacja interfejsu użytkownika",
+      class_time: "12:15 - 13:45",
     },
     {
       subject: "Podstawy ochrony informacji",
-      lesson_form: "przygotowanie do laboratoriów",
-      study_day: "2024-12-04",
-      study_time: "09:00 - 10:30",
-      details: "Brak szczegółów",
-      class_time: "2024-12-05 10:15 - 12:00",
+      lesson_form: "Nauka do kolokwium",
+      study_day: getDateString(2),
+      study_time: "16:00 - 18:00",
+      details: "Kryptografia symetryczna i asymetryczna",
+      class_time: "10:15 - 11:45",
     },
     {
       subject: "Sztuczna inteligencja",
-      lesson_form: "nauka wybranych tematów",
-      study_day: "2024-12-04",
-      study_time: "18:00 - 20:00",
-      details: "Tematy do nauki: minmax, bayes",
-      class_time: "Brak zajęć",
+      lesson_form: "Ćwiczenia praktyczne",
+      study_day: getDateString(3),
+      study_time: "13:00 - 15:00",
+      details: "Implementacja algorytmu MinMax",
+      class_time: "15:15 - 16:45",
     },
   ];
 
   return (
-    <React.Fragment>
-      <div className="text-center">
-        <h2 className="mt-6 text-3xl">Przykładowy harmonogram</h2>
-        <p className="text-gray-500">
-          Harmonogram jest scrollowalny na mniejszych ekranach, wystarczy
-          przewijać na boki
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-orange-600">
+          Przykładowy harmonogram
+        </h2>
+        <p className="text-gray-600 mt-2">
+          Zobacz, jak wygląda wygenerowany plan nauki
         </p>
-        <ScheduleTable schedule={mockSchedule} />
       </div>
-    </React.Fragment>
+      <div className="max-w-6xl mx-auto">
+        <ScheduleCalendar schedule={mockSchedule} />
+      </div>
+    </div>
   );
 };
 

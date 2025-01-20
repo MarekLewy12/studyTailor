@@ -1,12 +1,30 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
+import { FaMoon, FaSun } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
   const [nav, setNav] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const { isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (document.documentElement.classList.contains("dark")) {
+      setIsDark(true);
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (isDark) {
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      setIsDark(true);
+    }
+  };
 
   const handleNav = () => {
     setNav(!nav);
@@ -21,130 +39,95 @@ function Navbar() {
 
   const navItems = [
     { name: "Strona główna", dest: "/" },
-    { name: "Logowanie", dest: "/login", auth: false },
     { name: "Stwórz harmonogram", dest: "/create", auth: true },
     { name: "Moje harmonogramy", dest: "/my-schedules", auth: true },
   ];
 
   return (
-    <div className="fixed w-full navbar-bg text-white shadow-md z-40">
-      <div className="flex items-center justify-between p-5 h-16">
-        {/* Logo */}
-        {/*<Link to="/" className="flex items-center">*/}
-        {/*  <img src="/logo.png" alt="Logo aplikacji" className="h-16 w-auto" />*/}
-        {/*</Link>*/}
-
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex items-center justify-end space-x-8 w-full">
-          {navItems
-            .filter(
-              (item) =>
-                item.auth === undefined || item.auth === isAuthenticated,
-            )
-            .map((item, index) => (
-              <li key={index}>
+    <div className="fixed w-full bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-colors duration-300">
+      <div className="px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Menu po lewej */}
+          <nav className="hidden md:flex items-center space-x-6">
+            {navItems
+              .filter((item) => !item.auth || isAuthenticated)
+              .map((item, index) => (
                 <Link
+                  key={index}
                   to={item.dest}
-                  className="hover:text-orange-300 transition-colors duration-300"
+                  className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors duration-300"
                 >
                   {item.name}
                 </Link>
-              </li>
-            ))}
-          {isAuthenticated ? (
-            <li>
+              ))}
+          </nav>
+
+          {/* Przyciski po prawej stronie */}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-orange-700 transition-colors duration-300"
+              aria-label="Przełącz tryb ciemny"
+            >
+              {isDark ? <FaSun size={20} /> : <FaMoon size={20} />}
+            </button>
+
+            {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className="
-              inline-block
-              text-lg
-              px-3
-              py-1
-              rounded-full
-              bg-gradient-to-r
-              from-orange-400
-              to-orange-600
-              transition
-              duration-300
-              shadow-md
-              hover:shadow-lg
-              transform
-              hover:scale-110
-            "
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-full hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg"
               >
-                Wylogowanie
+                Wyloguj się
               </button>
-            </li>
-          ) : (
-            <li>
+            ) : (
               <Link
-                to="/register"
-                className="
-              inline-block
-              text-lg
-              px-3
-              py-1
-              rounded-full
-              bg-gradient-to-r
-              from-orange-400
-              to-orange-600
-              transition
-              duration-300
-              shadow-md
-              hover:shadow-lg
-              transform
-              hover:scale-110
-            "
+                to="/auth"
+                className="bg-white text-orange-600 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-300 shadow-lg"
               >
-                Rejestracja
+                Zaloguj się
               </Link>
-            </li>
-          )}
-        </ul>
+            )}
 
-        {/* Mobile Menu Icon */}
-        <div
-          onClick={handleNav}
-          className="md:hidden cursor-pointer hover:text-orange-300 transition duration-300"
-        >
-          {nav ? <AiOutlineClose size={25} /> : <AiOutlineMenu size={25} />}
+            {/* Mobile menu button */}
+            <button
+              onClick={handleNav}
+              className="md:hidden hover:text-orange-200 transition-colors duration-300"
+            >
+              {nav ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <ul
+      <div
         className={`${
-          nav ? "left-0" : "-left-full"
-        } fixed top-0 bg-orange-950 text-white w-1/2 h-full transition-all duration-300 md:hidden`}
+          nav ? "translate-x-0" : "-translate-x-full"
+        } fixed top-0 left-0 w-64 h-full bg-orange-900 transform transition-transform duration-300 ease-in-out md:hidden`}
       >
-        <div className="flex justify-between items-center border-b border-orange-700 p-4">
-          <Link to="/" className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="Nasze logo"
-              // className="h-12 w-auto mr-3"
-              width={60} // szerokość logo w trybie mobilnym
-              height={60} // wysokość logo w trybie mobilnym
-            />
-          </Link>
-          <AiOutlineClose
-            size={25}
+        <div className="flex justify-between items-center p-4 border-b border-orange-800">
+          <button
             onClick={handleNav}
-            className="cursor-pointer hover:text-orange-300 transition duration-300"
-          />
+            className="hover:text-orange-200 transition-colors duration-300"
+          >
+            <AiOutlineClose size={24} />
+          </button>
         </div>
-        {navItems.map((item, index) => (
-          <li key={index} className="border-b border-orange-700">
-            <Link
-              to={item.dest}
-              onClick={handleNav}
-              className="block p-4 hover:bg-orange-700 transition-colors duration-300"
-            >
-              {item.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
+        <nav className="py-4">
+          {navItems
+            .filter((item) => !item.auth || isAuthenticated)
+            .map((item, index) => (
+              <Link
+                key={index}
+                to={item.dest}
+                onClick={() => setNav(false)}
+                className="block px-4 py-2 hover:bg-orange-800 transition-colors duration-300"
+              >
+                {item.name}
+              </Link>
+            ))}
+        </nav>
+      </div>
     </div>
   );
 }
