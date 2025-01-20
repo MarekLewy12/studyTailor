@@ -4,6 +4,8 @@ import requests
 from datetime import datetime, timedelta
 from tabulate import tabulate
 import json
+import os
+from django.conf import settings
 
 
 class StudyPlanner:
@@ -12,7 +14,11 @@ class StudyPlanner:
         Inicjalizacja z kluczem API OpenAI.
         """
         self.last_prompt = None
-        api_key = "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"
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError(
+                "Brak klucza API OpenAI. Upewnij się, że zmienna środowiskowa OPENAI_API_KEY jest ustawiona."
+            )
         self.client = openai.OpenAI(api_key=api_key)
         self.endpoint = "https://plan.zut.edu.pl/schedule_student.php"
         self.model = model
