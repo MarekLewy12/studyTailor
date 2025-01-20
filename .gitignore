@@ -178,4 +178,10 @@ pyrightconfig.json
 
 tests
 
+node_modules/
+frontend/package.json
+frontend/package-lock.json
+
+qodana.yaml
+
 # End of https://www.toptal.com/developers/gitignore/api/python

@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 body {
-    font-family: "Lato", sans-serif;
-    background-color: #fbf2ee;
-}
-
+    font-family: "Poppins", sans-serif;
+    background-image: linear-gradient(-225deg, #E3FDF5 0%, #FFE6FA 100%);    /*background-image: linear-gradient(to top, #d299c2 0%, #fef9d7 100%);*/
+    /*background-image: linear-gradient(45deg, #ee9ca7 0%, #ffdde1 100%);}*/
+    }
 .navbar-bg {
     background: #C04848;  /* fallback for old browsers */
     background: -webkit-linear-gradient(to right, #480048, #C04848);  /* Chrome 10-25, Safari 5.1-6 */
@@ -19,6 +19,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
 
 /* Wejście strony */
 .page-enter {
@@ -40,4 +41,21 @@ body {
 .page-exit-active {
     opacity: 0;
     transition: opacity 500ms ease-in-out;
+}
+
+/* Dla animacji tekstu na HeroSection */
+.fade-enter {
+  opacity: 0;
+    position: absolute;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }

@@ -1,7 +1,12 @@
-import React from "react";
-import { FaRegCalendarCheck, FaChartLine, FaSmileBeam } from "react-icons/fa";
+import React, { forwardRef } from "react";
+import {
+  FaRegCalendarCheck,
+  FaChartLine,
+  FaSmileBeam,
+  FaDatabase,
+} from "react-icons/fa";
 
-const FeaturesSection = () => {
+const FeaturesSection = forwardRef((props, ref) => {
   const features = [
     {
       icon: <FaRegCalendarCheck size={30} className="text-orange-500" />,
@@ -19,12 +24,18 @@ const FeaturesSection = () => {
       icon: <FaSmileBeam size={30} className="text-orange-500" />,
       title: "Przyjazny interfejs",
       description:
-        "Intuicyjny projekt, który sprawia, że korzystanie z aplikacji jest łatwe i przyjemne.",
+        "Studia są wystarczająco trudne, dlatego nasza aplikacja jest prosta i intuicyjna, aby ułatwić Twoje studenckie życie.",
+    },
+    {
+      icon: <FaDatabase size={30} className="text-orange-500" />,
+      title: "Tworzenie kont i autoryzacja",
+      description:
+        "Załóż konto, aby korzystać z aplikacji i zapisywać swoje harmonogramy.",
     },
   ];
 
   return (
-    <div className="py-10 px-4 text-center">
+    <div ref={ref} className="py-10 px-4 text-center">
       <h2 className="text-3xl mt-12 md:text-4xl font-bold mb-6 text-orange-500">
         Poznaj funkcje naszej aplikacji
       </h2>
@@ -32,7 +43,7 @@ const FeaturesSection = () => {
         Zautomatyzuj swoje harmonogramy nauki, śledź swoje postępy i osiągaj
         więcej każdego dnia.
       </p>
-      <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+      <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
         {features.map((feature, index) => (
           <div
             key={index}
@@ -48,6 +59,6 @@ const FeaturesSection = () => {
       </div>
     </div>
   );
-};
+});
 
 export default FeaturesSection;

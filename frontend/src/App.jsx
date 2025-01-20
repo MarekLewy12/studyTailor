@@ -9,6 +9,10 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage.jsx";
+import MySchedulesPage from "./pages/MySchedulesPage.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 const AppContent = () => {
   const location = useLocation();
@@ -17,14 +21,13 @@ const AppContent = () => {
     <div className="app">
       <Navbar />
       <TransitionGroup>
-        <CSSTransition
-          key={location.key}
-          classNames="page"
-          timeout={500} // animacja trwa 0.5s (można zmienić tutaj czas)
-        >
+        <CSSTransition key={location.key} classNames="page">
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/create" element={<CreatePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/my-schedules" element={<MySchedulesPage />} />
             <Route
               path="/my-schedules"
               element={<div>Moje harmonogramy</div>}
@@ -38,9 +41,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 
