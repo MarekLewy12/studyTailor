@@ -31,7 +31,9 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'studytailor.onrender.com',
-    'onrender.com'
+    'onrender.com',
+    'studytailor-ff458288cb1c.herokuapp.com',
+    '.herokuapp.com'
 ]
 
 
