@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.urls import path, include
+from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from studyPlannerAPI import views
 from studyPlannerAPI.views import root_view
@@ -37,6 +38,7 @@ schema_view = get_schema_view(
     )
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.login_view, name='login'),
     path("", root_view, name='api-root'),
