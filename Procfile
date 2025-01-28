@@ -1,1 +1,1 @@
-web: gunicorn studyPlanner.wsgi
+web: cd backend && gunicorn studyPlanner.wsgi
