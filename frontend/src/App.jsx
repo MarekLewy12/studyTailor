@@ -4,37 +4,70 @@ import {
   Route,
   Routes,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
-import CreatePage from "./pages/CreatePage";
 import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage.jsx";
-import MySchedulesPage from "./pages/MySchedulesPage.jsx";
+import MyMaterialsPage from "./pages/MyMaterialsPage.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
 
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = React.useContext(AuthContext);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return children;
+};
 
 const AppContent = () => {
   const location = useLocation();
+  const { isAuthenticated } = React.useContext(AuthContext);
 
   return (
     <div className="app">
       <Navbar />
       <TransitionGroup>
-        <CSSTransition key={location.key} classNames="page">
+        <CSSTransition key={location.key} classNames="page" timeout={300}>
           <Routes location={location}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/create" element={<CreatePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/my-schedules" element={<MySchedulesPage />} />
-            <Route path="/auth" element={<AuthPage />} />
             <Route
-              path="/my-schedules"
-              element={<div>Moje harmonogramy</div>}
+              path="/"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <HomePage />
+                )
+              }
             />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+
+            {/* Chronione ścieżki */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-materials"
+              element={
+                <ProtectedRoute>
+                  <MyMaterialsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Przekierowanie 404 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </CSSTransition>
       </TransitionGroup>

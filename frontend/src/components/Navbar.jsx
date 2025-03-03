@@ -1,6 +1,13 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import { FaMoon, FaSun } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaHome,
+  FaList,
+  FaMoon,
+  FaRobot,
+  FaSun,
+} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -38,9 +45,23 @@ function Navbar() {
   };
 
   const navItems = [
-    { name: "Strona główna", dest: "/" },
-    { name: "Stwórz harmonogram", dest: "/create", auth: true },
-    { name: "Moje harmonogramy", dest: "/my-schedules", auth: true },
+    {
+      name: isAuthenticated ? "Dashboard" : "Strona główna",
+      dest: isAuthenticated ? "/dashboard" : "/",
+      icon: <FaHome className="mr-2" />,
+    },
+    {
+      name: "Moje materiały",
+      dest: "/my-materials",
+      auth: true,
+      icon: <FaList className="mr-2" />,
+    },
+    {
+      name: "Asystent nauki",
+      dest: "/assistant",
+      auth: true,
+      icon: <FaRobot className="mr-2" />,
+    },
   ];
 
   return (
@@ -82,7 +103,7 @@ function Navbar() {
             ) : (
               <Link
                 to="/auth"
-                className="bg-white text-orange-600 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-300 shadow-lg"
+                className="bg-white text-gray-700 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-300 shadow-lg"
               >
                 Zaloguj się
               </Link>

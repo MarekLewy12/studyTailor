@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import {API_BASE_URL} from "../config.js";
+import { API_BASE_URL } from "../config.js";
 
 const RegisterPage = () => {
   const [login, setLogin] = useState("");
@@ -43,7 +43,7 @@ const RegisterPage = () => {
       <div className="container mx-auto py-12 px-4 max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="flex flex-col justify-center items-center p-6 rounded-lg shadow-md border-2 border-amber-500">
-            <h2 className="text-2xl font-bold text-orange-600 mb-4">
+            <h2 className="text-2xl font-bold text-gray-700 mb-4">
               Witamy w StudyTailor
             </h2>
             <p className="text-gray-700 mb-4 text-center">
@@ -65,7 +65,7 @@ const RegisterPage = () => {
           <div>
             <AnimatedSection>
               <div className="text-center mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold text-orange-600">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-700">
                   Zarejestruj się
                 </h1>
                 <h2 className="mt-4 text-lg text-gray-600">

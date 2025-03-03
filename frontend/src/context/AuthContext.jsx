@@ -1,17 +1,41 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
-export const AuthContext = createContext(); // utworzenie kontekstu
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // stan autoryzacji
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Sprawdź token przy pierwszym ładowaniu
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        setIsAuthenticated(true);
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
 
   const login = () => {
     setIsAuthenticated(true);
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     setIsAuthenticated(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout }}>

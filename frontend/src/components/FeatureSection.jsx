@@ -1,12 +1,10 @@
 import React, { forwardRef } from "react";
 import { motion } from "framer-motion";
 import {
+  FaRobot,
   FaRegCalendarCheck,
-  FaChartLine,
-  FaSmileBeam,
-  FaDatabase,
-  FaClock,
   FaBrain,
+  FaBookOpen,
   FaLaptopCode,
   FaUserGraduate,
 } from "react-icons/fa";
@@ -22,8 +20,10 @@ const FeatureCard = ({ icon, title, description }) => {
       <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center mb-6">
         {React.cloneElement(icon, { className: "text-white text-2xl" })}
       </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-3">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <h3 className="text-xl font-bold text-gray-800 mb-3 dark:text-gray-400">
+        {title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-500">{description}</p>
     </motion.div>
   );
 };
@@ -47,22 +47,22 @@ const StatisticCard = ({ value, label, delay }) => {
 const FeaturesSection = forwardRef((props, ref) => {
   const features = [
     {
+      icon: <FaRobot />,
+      title: "Asystent AI",
+      description:
+        "Zadawaj pytania i otrzymuj odpowiedzi dostosowane do konkretnego przedmiotu",
+    },
+    {
       icon: <FaRegCalendarCheck />,
-      title: "Automatyczne harmonogramy",
+      title: "Śledzenie postępów",
       description:
-        "Twórz spersonalizowane plany nauki w kilka sekund dzięki sztucznej inteligencji",
+        "Monitoruj swoje postępy w nauce i oznaczaj przyswojone materiały",
     },
     {
-      icon: <FaClock />,
-      title: "Oszczędność czasu",
+      icon: <FaBookOpen />,
+      title: "Baza materiałów",
       description:
-        "Zapomnij o ręcznym planowaniu - pozwól AI zrobić to za Ciebie",
-    },
-    {
-      icon: <FaBrain />,
-      title: "Inteligentna adaptacja",
-      description:
-        "System dostosowuje się do Twoich preferencji i stylu uczenia się",
+        "Przechowuj wszystkie materiały naukowe w jednym miejscu z łatwym dostępem",
     },
     {
       icon: <FaLaptopCode />,
@@ -73,9 +73,9 @@ const FeaturesSection = forwardRef((props, ref) => {
   ];
 
   const statistics = [
-    { value: "100%", label: "Automatyzacji" },
-    { value: "24/7", label: "Dostępność" },
-    { value: "♾️", label: "Oszczędność czasu" },
+    { value: "24/7", label: "Wsparcie w nauce" },
+    { value: "AI", label: "Inteligentny tutor" },
+    { value: "100%", label: "Personalizacji" },
   ];
 
   return (
@@ -96,15 +96,15 @@ const FeaturesSection = forwardRef((props, ref) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 max-w-2xl mx-auto"
+            className="text-xl text-gray-600 dark:text-white max-w-2xl mx-auto"
           >
-            Odkryj, jak nasza aplikacja może zrewolucjonizować Twój sposób nauki
-            i zarządzania czasem na studiach
+            Odkryj, jak nasz inteligentny asystent może wspomóc Twoją naukę i
+            pomóc w zrozumieniu trudnych zagadnień
           </motion.p>
         </div>
 
         {/* Siatka z funkcjami */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 ">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
@@ -125,12 +125,12 @@ const FeaturesSection = forwardRef((props, ref) => {
           transition={{ delay: 0.4 }}
           className="text-center mt-20"
         >
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-400 mb-4">
             Gotowy, aby zacząć?
           </h3>
-          <p className="text-gray-600 mb-8">
-            Dołącz do społeczności studentów, którzy już odkryli zalety
-            inteligentnego planowania
+          <p className="text-gray-600 dark:text-white mb-8">
+            Dołącz do społeczności studentów, którzy już korzystają z
+            inteligentnego wsparcia w nauce
           </p>
           <button className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full font-semibold hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
             Rozpocznij za darmo

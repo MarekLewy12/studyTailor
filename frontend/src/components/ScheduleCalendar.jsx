@@ -54,7 +54,7 @@ const ScheduleCalendar = ({ schedule }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+    <div className="bg-gray-100 dark:bg-gray-900 rounded-xl shadow-xl p-6 transition-colors duration-300">
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"

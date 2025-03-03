@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import HeroSection from "../components/HeroSection";
 import FeaturesSection from "../components/FeatureSection.jsx";
-import MockSchedule from "../components/MockSchedule.jsx";
+import AIAssistantDemo from "../components/AIAssistantDemo.jsx";
 import FAQSection from "../components/FAQSection.jsx";
 import AboutProjectSection from "../components/AboutProjectSection.jsx";
 
@@ -21,11 +21,10 @@ const HomePage = () => {
 
   return (
     <div>
-      {/* Hero (zdjęcie z przyciskiem)) */}
+      {/* Hero (zdjęcie z przyciskiem) */}
       <HeroSection scrollToFeatures={scrollToFeatures} />
 
       {/* Features (funkcje naszej aplikacji) */}
-
       <div id="features" ref={featuresRef}>
         <FeaturesSection />
       </div>
@@ -40,8 +39,8 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Przykładowy harmonogram */}
-      <MockSchedule />
+      {/* Demo AI Assistant */}
+      <AIAssistantDemo />
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import {API_BASE_URL} from "../config.js";
+import { API_BASE_URL } from "../config.js";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -47,7 +47,7 @@ const LoginPage = () => {
               alt="Logo aplikacji"
               className="mx-auto h-32 w-auto mb-4"
             />
-            <h1 className="text-3xl md:text-4xl font-bold text-orange-600">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-700">
               Logowanie
             </h1>
           </div>

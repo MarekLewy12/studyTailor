@@ -123,3 +123,11 @@ body {
 .fc-event {
     @apply rounded-lg shadow-sm !important;
 }
+
+.fc-col-header-cell {
+    @apply text-gray-800 !important;
+}
+
+.fc-timegrid-axis-cushion {
+    @apply text-gray-800 !important;
+}
