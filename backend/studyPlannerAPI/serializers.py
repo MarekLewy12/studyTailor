@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from studyPlannerAPI.models import ModelRequest
+from .models import Subject, Material, StudySession
 
 
 class ModelRequestSerializer(serializers.ModelSerializer):
@@ -17,3 +18,28 @@ class RegisterSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()
     access = serializers.CharField()
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Material
+        fields = ['id', 'title', 'description', 'file', 'link', 'created_at']
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    materials_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subject
+        fields = ['id', 'name', 'lesson_form', 'start_datetime', 'end_datetime', 'is_mastered', 'materials_count']
+
+    def get_materials_count(self, obj):
+        return obj.materials.count()
+
+
+class StudySessionSerializer(serializers.ModelSerializer):
+    subject_name = serializers.CharField(source='subject.name', read_only=True)
+
+    class Meta:
+        model = StudySession
+        fields = ['id', 'subject', 'subject_name', 'questions', 'answers', 'created_at']

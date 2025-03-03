@@ -1,7 +1,8 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import JSONParser
 from rest_framework import status, generics, permissions
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -9,6 +10,13 @@ from studyPlannerAPI.models import ModelRequest, CustomUser
 from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
 
 from studyPlanner.services import StudyPlanner
+
+from django.conf import settings
+import json
+from datetime import datetime, date
+
+from .models import Subject, Material, StudySession
+from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer
 
 @api_view(['GET'])
 def root_view(request):
@@ -118,3 +126,138 @@ def login_view(request):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_subjects(request):
+    """
+    Pobiera plan zajęć z API ZUT i zapisuje jako przedmioty w bazie.
+    """
+    try:
+        album_number = request.user.album_number
+
+        if not album_number:
+            return Response({"error": "Brak numeru albumu"}, status=400)
+
+        # Wykorzystaj istniejącą funkcję do pobierania planu
+        planner = StudyPlanner()
+        schedule_data = planner.get_schedule(album_number)
+
+        # Usuń stare przedmioty dla tego użytkownika
+        Subject.objects.filter(user=request.user).delete()
+
+        # Zapisz nowe przedmioty
+        for item in schedule_data:
+            Subject.objects.create(
+                user=request.user,
+                name=item['subject'],
+                lesson_form=item['lesson_form'],
+                start_datetime=item['start_datetime'],
+                end_datetime=item['end_datetime']
+            )
+
+        # Pobierz zapisane przedmioty i zwróć je
+        subjects = Subject.objects.filter(user=request.user).order_by('start_datetime')
+        serializer = SubjectSerializer(subjects, many=True)
+
+        return Response(serializer.data)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def toggle_subject_mastered(request, pk):
+    """
+    Oznaczanie przedmiotu jako przyswojony/nieprzyswojony
+    """
+    try:
+        subject = Subject.objects.get(pk=pk, user=request.user)
+    except Subject.DoesNotExist:
+        return Response(status=404)
+
+    subject.is_mastered = not subject.is_mastered
+    subject.save()
+
+    serializer = SubjectSerializer(subject)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def study_with_ai(request, subject_id):
+    """
+    Sesja nauki z AI dla konkretnego przedmiotu
+    """
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+
+    question = request.data.get('question')
+    if not question:
+        return Response({"error": "Brak pytania"}, status=400)
+
+    planner = StudyPlanner()
+    prompt = f"""
+    Jestem studentem uczącym się przedmiotu "{subject.name}".
+    Oto moje pytanie: {question}
+
+    Odpowiedz w sposób jasny, zwięzły i pomocny. Podaj konkretne informacje
+    i przykłady, które pomogą mi zrozumieć materiał.
+    """
+
+    try:
+        response = planner.client.chat.completions.create(
+            model=planner.model,
+            messages=[
+                {"role": "system", "content": "Jesteś pomocnym asystentem nauki."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1024,
+            temperature=0.7,
+        )
+
+        answer = response.choices[0].message.content
+
+        # Zapisz sesję nauki
+        session = StudySession.objects.create(
+            user=request.user,
+            subject=subject,
+            questions=question,
+            answers=answer
+        )
+
+        return Response({
+            "subject": subject.name,
+            "question": question,
+            "answer": answer
+        })
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def materials(request, subject_id):
+    """
+    Lista materiałów dla przedmiotu lub dodawanie nowego materiału
+    """
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+
+    if request.method == 'GET':
+        materials = Material.objects.filter(subject=subject)
+        serializer = MaterialSerializer(materials, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = MaterialSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(subject=subject)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.conf import settings
 
 class CustomUserManager(UserManager):
     def create_superuser(
@@ -42,3 +43,48 @@ class CustomUser(AbstractUser):
         elif not self.album_number:
             raise ValueError("Album number is required for non-superusers.")
         super().save(*args, **kwargs)
+
+
+class Subject(models.Model):
+    """Model przedmiotu z planu zajęć"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subjects')
+    name = models.CharField(max_length=200)
+    lesson_form = models.CharField(max_length=100)  # np. wykład, laboratorium
+    start_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField()
+    is_mastered = models.BooleanField(default=False)  # Czy materiał został przyswojony
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start_datetime']
+
+    def __str__(self):
+        return f"{self.name} ({self.start_datetime.strftime('%Y-%m-%d %H:%M')})"
+
+
+class Material(models.Model):
+    """Materiały do nauki dla przedmiotu"""
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='materials')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='materials/', blank=True, null=True)
+    link = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class StudySession(models.Model):
+    """Historia sesji nauki z AI dla przedmiotu"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='study_sessions')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_sessions')
+    questions = models.TextField()
+    answers = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Sesja nauki: {self.subject.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
