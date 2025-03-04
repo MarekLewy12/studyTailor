@@ -30,16 +30,10 @@ const HeroSection = ({ scrollToFeatures }) => {
   return (
     <div className="relative py-20 min-h-screen flex items-center justify-center overflow-hidden">
       {/* Tło z gradientem */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('hero_bg.jpg')`,
-          filter: "brightness(0.3)",
-        }}
-      />
+      <div className="absolute inset-0 bg-cover bg-center" />
 
       {/* Animowany gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-orange-900/80 to-amber-900/80 animate-gradient" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-800 to-amber-600 animate-gradient" />
 
       {/* Zawartość */}
       <div className="relative z-10 container mx-auto px-4 flex flex-col items-center">
@@ -100,9 +94,6 @@ const HeroSection = ({ scrollToFeatures }) => {
           </div>
         </motion.div>
       </div>
-
-      {/* Dekoracyjne elementy */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/50 to-transparent" />
     </div>
   );
 };
