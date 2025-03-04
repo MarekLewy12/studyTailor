@@ -49,4 +49,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path("subjects/", views.get_subjects, name='get_subjects'),
     path("verify-album-number/", views.verify_album_number, name='verify_album_number'),
+    path('subjects/<int:pk>/mastered/', views.toggle_subject_mastered, name='toggle_subject_mastered'),
 ]
