@@ -48,4 +48,5 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path("subjects/", views.get_subjects, name='get_subjects'),
+    path("verify-album-number/", views.verify_album_number, name='verify_album_number'),
 ]

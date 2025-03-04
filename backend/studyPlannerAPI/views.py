@@ -80,8 +80,6 @@ def model_request_details(request, pk):
         return Response(serializer.data)
 
 
-
-
 # Rejestracja użytkownika
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -102,6 +100,14 @@ class RegisterView(generics.CreateAPIView):
         password = serializer.validated_data.get('password')
         album_number = serializer.validated_data.get('album_number')
 
+        # jeśli login istnieje
+        if CustomUser.objects.filter(username=username).exists():
+            return Response({"error": "Użytkownik o takim loginie już istnieje! Stwórz inny"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # jeśli numer albumu istnieje
+        if CustomUser.objects.filter(album_number=album_number).exists():
+            return Response({"error": "Użytkownik o takim numerze albumu już istnieje! Stwórz inny"}, status=status.HTTP_400_BAD_REQUEST)
+
         user = CustomUser.objects.create_user(username=username, password=password, album_number=album_number)
         refresh = RefreshToken.for_user(user)
 
@@ -116,9 +122,9 @@ class RegisterView(generics.CreateAPIView):
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    album_number = request.data.get('album_number')
 
-    user = CustomUser.objects.filter(username=username, album_number=album_number).first()
+    user = CustomUser.objects.filter(username=username).first()
+
     if user is None or not user.check_password(password):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
     refresh = RefreshToken.for_user(user)
@@ -261,3 +267,21 @@ def materials(request, subject_id):
             serializer.save(subject=subject)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+
+@api_view(['POST'])
+def verify_album_number(request):
+    album_number = request.data.get('album_number')
+
+    try:
+        study_planner = StudyPlanner()
+        schedule = study_planner.get_schedule(album_number)
+
+        # Sprawdzenie czy otrzymaliśmy jakiekolwiek dane
+        if not schedule or len(schedule) == 0:
+            return Response({"valid": False, "message": "Nie znaleziono planu zajęć dla tego numeru albumu"})
+
+        return Response({"valid": True})
+
+    except Exception as e:
+        return Response({"valid": False, "message": str(e)}, status=500)
