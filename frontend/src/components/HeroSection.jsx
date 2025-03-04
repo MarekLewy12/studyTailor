@@ -7,15 +7,15 @@ const HeroSection = ({ scrollToFeatures }) => {
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
     {
-      icon: <FaRobot className="text-amber-400 text-4xl" />,
+      icon: <FaRobot className="text-indigo-300 text-4xl" />,
       text: "Inteligentny asystent wspierający naukę",
     },
     {
-      icon: <FaGraduationCap className="text-amber-400 text-4xl" />,
+      icon: <FaGraduationCap className="text-indigo-300 text-4xl" />,
       text: "Automatyczna synchronizacja z planem ZUT",
     },
     {
-      icon: <FaBrain className="text-amber-400 text-4xl" />,
+      icon: <FaBrain className="text-indigo-300 text-4xl" />,
       text: "Personalizowane podpowiedzi i wskazówki AI",
     },
   ];
@@ -33,7 +33,7 @@ const HeroSection = ({ scrollToFeatures }) => {
       <div className="absolute inset-0 bg-cover bg-center" />
 
       {/* Animowany gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-800 to-amber-600 animate-gradient" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-800 to-purple-700 animate-gradient" />
 
       {/* Zawartość */}
       <div className="relative z-10 container mx-auto px-4 flex flex-col items-center">
@@ -48,7 +48,7 @@ const HeroSection = ({ scrollToFeatures }) => {
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
             <span className="block mb-6">Twoja nauka,</span>
-            <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-transparent bg-clip-text">
+            <span className="bg-gradient-to-r from-indigo-200 to-purple-300 text-transparent bg-clip-text">
               Twój osobisty asystent
             </span>
           </h1>
@@ -81,7 +81,7 @@ const HeroSection = ({ scrollToFeatures }) => {
           <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6">
             <Link
               to="/auth"
-              className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
+              className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-full font-semibold hover:from-indigo-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
             >
               Rozpocznij za darmo
             </Link>

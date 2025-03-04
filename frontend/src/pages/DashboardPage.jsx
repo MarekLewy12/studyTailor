@@ -73,7 +73,6 @@ const DashboardPage = () => {
   }, []);
 
   const handleToggleIgnore = async (subjectId) => {
-    // To będzie zaimplementowane w przyszłości
     console.log(`Przełączenie ignorowania dla przedmiotu ${subjectId}`);
   };
 

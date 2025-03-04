@@ -14,7 +14,7 @@ const AboutProjectSection = () => {
       className="py-10 px-4"
     >
       <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl border border-orange-100 dark:border-orange-900">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-amber-600 text-transparent bg-clip-text text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-indigo-500 to-blue-400 text-transparent bg-clip-text text-center">
           O projekcie
         </h2>
         <div className="max-w-4xl mx-auto space-y-4">

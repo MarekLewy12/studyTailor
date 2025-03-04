@@ -17,7 +17,7 @@ const FeatureCard = ({ icon, title, description }) => {
       viewport={{ once: true }}
       className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
     >
-      <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center mb-6">
+      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mb-6">
         {React.cloneElement(icon, { className: "text-white text-2xl" })}
       </div>
       <h3 className="text-xl font-bold text-gray-800 mb-3 dark:text-gray-400">
@@ -37,13 +37,12 @@ const StatisticCard = ({ value, label, delay }) => {
       viewport={{ once: true }}
       className="text-center p-6 bg-white dark:bg-gray-800 backdrop-blur-sm rounded-xl shadow-lg transition-all duration-300"
     >
-      <div className="text-4xl font-bold text-orange-500 mb-2">{value}</div>
+      <div className="text-4xl font-bold text-indigo-500 mb-2">{value}</div>
       <div className="text-black dark:text-white">{label}</div>
     </motion.div>
   );
 };
 
-// eslint-disable-next-line react/display-name
 const FeaturesSection = forwardRef((props, ref) => {
   const features = [
     {
@@ -87,7 +86,7 @@ const FeaturesSection = forwardRef((props, ref) => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-amber-600 text-transparent bg-clip-text"
+            className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text"
           >
             Dlaczego warto korzystać ze StudyTailor?
           </motion.h2>
@@ -132,7 +131,7 @@ const FeaturesSection = forwardRef((props, ref) => {
             Dołącz do społeczności studentów, którzy już korzystają z
             inteligentnego wsparcia w nauce
           </p>
-          <button className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full font-semibold hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+          <button className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
             Rozpocznij za darmo
           </button>
         </motion.div>

@@ -10,7 +10,7 @@ const FAQSection = () => {
     {
       question: "W jaki sposób założyć konto?",
       answer:
-        "Aby założyć konto, wystarczy kliknąć przycisk 'Załóż konto' w prawym górnym rogu strony. Następnie należy wypełnić formularz rejestracyjny i potwierdzić adres e-mail.",
+        "Aby założyć konto, wystarczy kliknąć przycisk 'Zaloguj się' w prawym górnym rogu strony. Następnie należy wypełnić formularz rejestracyjny i potwierdzić adres e-mail.",
     },
     {
       question: "Czy aplikacja jest darmowa?",
@@ -20,7 +20,7 @@ const FAQSection = () => {
     {
       question: "Jakie są korzyści z korzystania z aplikacji?",
       answer:
-        "Korzystanie z aplikacji pozwala na zautomatyzowanie tworzenia harmonogramów nauki, przez co w ciągu kilku sekund uzyskasz jasny i zrozumiały plan działania.",
+        "Korzystanie z aplikacji pozwala na ułatwienie procesu nauki, poprzez umożliwienie organizacji materiałów w jednym miejscu, uczenie się z pomocą AI oraz śledzenie postępów w nauce.",
     },
   ];
 
@@ -33,7 +33,7 @@ const FAQSection = () => {
       className="py-10 px-4"
     >
       <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl border border-orange-100 dark:border-orange-900">
-        <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-orange-600 to-amber-600 text-transparent bg-clip-text text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-indigo-500 to-blue-400 text-transparent bg-clip-text text-center">
           FAQ
         </h2>
         <div className="max-w-4xl mx-auto space-y-4">
@@ -49,7 +49,7 @@ const FAQSection = () => {
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="w-full text-left"
               >
-                <div className="bg-orange-50 dark:bg-gray-700 p-4 rounded-lg flex items-center justify-between hover:bg-orange-100 dark:hover:bg-gray-600 transition-colors duration-300">
+                <div className="bg-indigo-50 dark:bg-gray-700 p-4 rounded-lg flex items-center justify-between hover:bg-indigo-100 dark:hover:bg-gray-600 transition-colors duration-300">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                     {faq.question}
                   </h3>

@@ -1,13 +1,17 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE_URL } from "../config.js";
-import { FaUserGraduate, FaLock, FaIdCard } from "react-icons/fa";
+import ClipLoader from "react-spinners/ClipLoader";
+import { FaUserGraduate, FaLock, FaIdCard, FaArrowRight } from "react-icons/fa";
 
 const AuthPage = () => {
   const [isLoginView, setIsLoginView] = useState(true);
+  const [isValidatingAlbum, setIsValidatingAlbum] = useState(false);
+  const [albumWarning, setAlbumWarning] = useState(null);
+  const [albumConfirmed, setAlbumConfirmed] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -18,18 +22,74 @@ const AuthPage = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const validateAlbumNumber = useCallback(async () => {
+    if (!formData.albumNumber || formData.albumNumber.length !== 5) return;
+
+    setIsValidatingAlbum(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/verify-album-number/`,
+        {
+          album_number: formData.albumNumber,
+        },
+      );
+
+      if (!response.data.valid) {
+        setAlbumWarning(
+          response.data.message || "Ten numer albumu jest nieprawidłowy",
+        );
+        setAlbumConfirmed(false);
+      } else {
+        setAlbumWarning(null);
+        setAlbumConfirmed(true);
+      }
+    } catch (error) {
+      setAlbumWarning("Nie udało się zweryfikować albumu");
+      setAlbumConfirmed(false);
+    } finally {
+      setIsValidatingAlbum(false);
+    }
+  }, [formData.albumNumber]);
+
+  useEffect(() => {
+    if (!isLoginView && formData.albumNumber) {
+      const timer = setTimeout(() => {
+        validateAlbumNumber();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData.albumNumber, isLoginView, validateAlbumNumber]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isLoginView && albumWarning && !albumConfirmed) {
+      setError("Potwierdź, że chcesz użyć tego numeru albumu.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
       const endpoint = isLoginView ? "/login/" : "/register/";
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, {
-        username: formData.username,
-        password: formData.password,
-        album_number: formData.albumNumber,
-      });
+
+      const requestData = isLoginView
+        ? {
+            username: formData.username,
+            password: formData.password,
+          }
+        : {
+            username: formData.username,
+            password: formData.password,
+            album_number: formData.albumNumber,
+          };
+
+      const response = await axios.post(
+        `${API_BASE_URL}${endpoint}`,
+        requestData,
+      );
 
       localStorage.setItem("token", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
@@ -61,192 +121,212 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-10 flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container max-w-5xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-2xl shadow-2xl bg-white dark:bg-gray-800"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            {/* Panel lewy z animowanym tłem */}
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-800"></div>
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB4PSIwIiB5PSIwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIj48L3JlY3Q+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIj48L3JlY3Q+PC9zdmc+')]"></div>
-              </div>
-              <div className="relative flex flex-col justify-center items-center py-20 px-8 h-full">
-                <motion.img
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  src="/study_logo_orange_no_text.png"
-                  alt="Logo"
-                  className="w-32 h-32 mb-12"
-                />
-                <motion.h2
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="text-3xl font-bold mb-6 text-center text-white"
-                >
-                  {isLoginView ? "Witaj z powrotem!" : "Dołącz do nas!"}
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="text-lg mb-8 text-center text-white/80 max-w-md"
-                >
-                  {isLoginView
-                    ? "Zaloguj się, aby korzystać z asystenta nauki i wszystkich funkcji StudyTailor."
-                    : "Utwórz konto i rozpocznij swoją edukacyjną podróż ze wsparciem sztucznej inteligencji."}
-                </motion.p>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setIsLoginView(true)}
-                    className={`px-6 py-3 rounded-full transition-all duration-300 ${
-                      isLoginView
-                        ? "bg-white text-purple-700 font-semibold shadow-lg"
-                        : "bg-transparent text-white border-2 border-white/30 hover:border-white/80"
-                    }`}
-                  >
-                    Logowanie
-                  </button>
-                  <button
-                    onClick={() => setIsLoginView(false)}
-                    className={`px-6 py-3 rounded-full transition-all duration-300 ${
-                      !isLoginView
-                        ? "bg-white text-purple-700 font-semibold shadow-lg"
-                        : "bg-transparent text-white border-2 border-white/30 hover:border-white/80"
-                    }`}
-                  >
-                    Rejestracja
-                  </button>
-                </div>
-              </div>
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Lewa strona - graficzny panel */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="flex-1 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden py-20"
+      >
+        <div className="relative h-full flex flex-col justify-center items-center p-8 text-center">
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="mb-8"
+          >
+            <img
+              src="/study_logo_orange_no_text.png"
+              alt="Logo"
+              className="w-32 h-32 md:w-40 md:h-40 mx-auto"
+            />
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+          >
+            {isLoginView ? "Witaj z powrotem!" : "Dołącz do nas!"}
+          </motion.h1>
+
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="text-xl text-white/80 max-w-md mb-12"
+          >
+            {isLoginView
+              ? "Zaloguj się, aby korzystać z inteligentnego asystenta nauki i wszystkich funkcji StudyTailor."
+              : "Utwórz konto i korzystaj z naszego asystenta AI do planowania nauki na ZUT."}
+          </motion.p>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+            className="mt-auto"
+          >
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => setIsLoginView(true)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 min-w-[140px] ${
+                  isLoginView
+                    ? "bg-white text-indigo-700 shadow-lg"
+                    : "bg-transparent text-white border border-white/50 hover:bg-white/10"
+                }`}
+              >
+                Logowanie
+              </button>
+              <button
+                onClick={() => setIsLoginView(false)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 min-w-[140px] ${
+                  !isLoginView
+                    ? "bg-white text-indigo-700 shadow-lg"
+                    : "bg-transparent text-white border border-white/50 hover:bg-white/10"
+                }`}
+              >
+                Rejestracja
+              </button>
             </div>
+          </motion.div>
+        </div>
+      </motion.div>
 
-            {/* Panel prawy - formularz */}
-            <div className="bg-white dark:bg-gray-800 p-8 md:p-12">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isLoginView ? "login" : "register"}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full flex flex-col justify-center"
-                >
-                  <h3 className="text-2xl font-bold mb-8 text-gray-800 dark:text-white">
-                    {isLoginView ? "Zaloguj się do konta" : "Utwórz nowe konto"}
-                  </h3>
+      {/* Prawa strona - formularz */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900"
+      >
+        <div className="w-full max-w-md px-6 py-8 sm:px-8 sm:py-12">
+          <motion.div
+            key={isLoginView ? "login" : "register"}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-8">
+              {isLoginView ? "Zaloguj się" : "Utwórz konto"}
+            </h2>
 
-                  {error && (
-                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400">
-                      {error}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400 rounded-r">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2 flex items-center">
+                  <FaUserGraduate className="mr-2" />
+                  Login
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white transition-colors duration-300"
+                  placeholder="Wprowadź login"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2 flex items-center">
+                  <FaLock className="mr-2" />
+                  Hasło
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white transition-colors duration-300"
+                  placeholder="Wprowadź hasło"
+                  required
+                />
+              </div>
+
+              {!isLoginView && (
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2 flex items-center">
+                    <FaIdCard className="mr-2" />
+                    Numer albumu
+                  </label>
+                  <input
+                    type="text"
+                    name="albumNumber"
+                    value={formData.albumNumber}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border ${albumWarning ? "border-orange-500" : "border-gray-300 dark:border-gray-700"} focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:text-white transition-colors duration-300`}
+                    placeholder="Wprowadź numer albumu"
+                    required
+                  />
+
+                  {isValidatingAlbum && (
+                    <div className="mt-1 text-sm text-gray-500">
+                      Weryfikacja numeru albumu...
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                        <FaUserGraduate className="mr-2" />
-                        Login
-                      </label>
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white transition-colors duration-300"
-                        placeholder="Wprowadź login"
-                        required
-                      />
+                  {albumWarning && (
+                    <div className="mt-2 p-3 rounded-md bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 text-orange-800 dark:text-orange-200 shadow-sm">
+                      <p>{albumWarning}</p>
+                      <div className="mt-2 flex items-center">
+                        <input
+                          type="checkbox"
+                          id="confirmAlbum"
+                          checked={albumConfirmed}
+                          onChange={() => setAlbumConfirmed(!albumConfirmed)}
+                          className="mr-2"
+                        />
+                        <label htmlFor="confirmAlbum" className="text-sm">
+                          Rozumiem i chcę kontynuować rejestrację
+                        </label>
+                      </div>
                     </div>
-                    <div>
-                      <label className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                        <FaLock className="mr-2" />
-                        Hasło
-                      </label>
-                      <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white transition-colors duration-300"
-                        placeholder="Wprowadź hasło"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                        <FaIdCard className="mr-2" />
-                        Numer albumu
-                      </label>
-                      <input
-                        type="text"
-                        name="albumNumber"
-                        value={formData.albumNumber}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white transition-colors duration-300"
-                        placeholder="Wprowadź numer albumu"
-                        required
-                      />
-                    </div>
-                    <motion.button
-                      type="submit"
-                      disabled={isLoading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`w-full mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl flex justify-center items-center ${
-                        isLoading ? "opacity-70 cursor-not-allowed" : ""
-                      }`}
-                    >
-                      {isLoading ? (
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                      ) : null}
-                      {isLoginView ? "Zaloguj się" : "Utwórz konto"}
-                    </motion.button>
-                  </form>
+                  )}
 
-                  <div className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-                    {isLoginView
-                      ? "Nie masz jeszcze konta?"
-                      : "Masz już konto?"}{" "}
-                    <button
-                      onClick={() => setIsLoginView(!isLoginView)}
-                      className="text-purple-600 hover:text-purple-800 font-medium"
-                    >
-                      {isLoginView ? "Zarejestruj się" : "Zaloguj się"}
-                    </button>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+                  {!albumWarning && albumConfirmed && (
+                    <div className="mt-2 p-3 rounded-md bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 text-green-800 dark:text-green-200 shadow-sm">
+                      Numer albumu zweryfikowany poprawnie.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <motion.button
+                type="submit"
+                disabled={
+                  isLoading || (!isLoginView && albumWarning && !albumConfirmed)
+                }
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold shadow-md flex items-center justify-center ${
+                  !isLoginView && !albumConfirmed
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:from-indigo-700 hover:to-purple-700"
+                }`}
+              >
+                {isLoading ? (
+                  <ClipLoader color="#ffffff" size={20} />
+                ) : (
+                  <>
+                    {isLoginView ? "Zaloguj się" : "Utwórz konto"}
+                    <FaArrowRight className="ml-2" />
+                  </>
+                )}
+              </motion.button>
+            </form>
+          </motion.div>
+        </div>
+      </motion.div>
     </div>
   );
 };

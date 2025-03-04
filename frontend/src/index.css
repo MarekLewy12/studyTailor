@@ -29,7 +29,7 @@ body {
 }
 
 .navbar-bg {
-    @apply bg-gradient-to-r from-orange-600 to-amber-600;
+    @apply bg-gradient-to-r from-indigo-500 to-blue-400;
 }
 
 .stylized-text {

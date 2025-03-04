@@ -6,7 +6,7 @@ const AIAssistantDemo = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-8">
-        <h2 className="text-5xl font-bold text-gray-700">
+        <h2 className="text-7xl font-bold text-indigo-500">
           Asystent AI do nauki
         </h2>
         <p className="text-gray-600 mt-2">
