@@ -155,30 +155,37 @@ def get_subjects(request):
         )
 
         if needs_update:
-            planner = StudyPlanner()
-            schedule_data = planner.get_schedule(user.album_number)
+            try:
+                planner = StudyPlanner()
+                schedule_data = planner.get_schedule(user.album_number)
 
-            existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
+                if hasattr(user, 'profile'):
+                    user.profile.last_schedule_update = datetime.now()
+                    user.profile.save()
 
-            for item in schedule_data:
-                subject, created = Subject.objects.update_or_create(
-                    user=user,
-                    name=item['subject'],
-                    lesson_form=item['lesson_form'],
-                    start_datetime=item['start_datetime'],
-                    defaults={
-                        'end_datetime': item['end_datetime']
-                    }
-                )
+                existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
 
-                if not created:
-                    existing_subjects = existing_subjects.exclude(id=subject.id)
+                for item in schedule_data:
+                    subject, created = Subject.objects.update_or_create(
+                        user=user,
+                        name=item['subject'],
+                        lesson_form=item['lesson_form'],
+                        start_datetime=item['start_datetime'],
+                        defaults={
+                            'end_datetime': item['end_datetime']
+                        }
+                    )
 
-            existing_subjects.delete()
+                    if not created:
+                        existing_subjects = existing_subjects.exclude(id=subject.id)
 
-            if hasattr(user, 'profile'):
-                user.profile.last_schedule_update = datetime.now()
-                user.profile.save()
+                existing_subjects.delete()
+
+                if hasattr(user, 'profile'):
+                    user.profile.last_schedule_update = datetime.now()
+                    user.profile.save()
+            except Exception as e:
+                print(f"Błąd podczas pobierania planu zajęć: {e}")
 
         subjects = Subject.objects.filter(user=user).order_by('start_datetime')
         serializer = SubjectSerializer(subjects, many=True)
@@ -186,7 +193,8 @@ def get_subjects(request):
         return Response({
             'data': serializer.data,
             'last_update': last_update.isoformat() if last_update else None,
-            'refreshed': needs_update
+            'refreshed': needs_update,
+            'empty_response': len(subjects) == 0
         })
     except Exception as e:
         return Response({"error": str(e)}, status=500)

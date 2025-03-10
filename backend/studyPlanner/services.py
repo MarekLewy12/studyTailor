@@ -36,7 +36,7 @@ class StudyPlanner:
         if response.status_code == 200:
             raw_schedule = response.json()
             if not raw_schedule:
-                raise ValueError("Otrzymano pustą odpowiedź z API.")
+                return []
             filtered_schedule = [  # Filtruje wykłady z harmonogramu
                 {
                     "subject": entry["subject"],
