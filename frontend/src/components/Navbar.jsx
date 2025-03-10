@@ -51,8 +51,8 @@ function Navbar() {
       icon: <FaHome className="mr-2" />,
     },
     {
-      name: "Moje materiały",
-      dest: "/my-materials",
+      name: "Moje przedmioty",
+      dest: "/my-subjects",
       auth: true,
       icon: <FaList className="mr-2" />,
     },

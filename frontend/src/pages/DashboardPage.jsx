@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import {
@@ -11,6 +11,7 @@ import {
   FaCheck,
   FaFilter,
   FaUserCog,
+  FaSyncAlt,
 } from "react-icons/fa";
 import { API_BASE_URL } from "../config.js";
 
@@ -22,55 +23,70 @@ const DashboardPage = () => {
     const saved = localStorage.getItem("showLectures");
     return saved !== null ? saved === "true" : true;
   });
+  const [lastUpdate, setLastUpdate] = useState(null); // ostatnia aktualizacja planu
+  const [isRefreshing, setIsRefreshing] = useState(false); // aktualizacja w trakcie
+  const [shouldRefresh, setShouldRefresh] = useState(true); // czy odświeżać dane
+
+  const fetchSubjects = async (forceRefresh = false) => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("Brak tokenu autoryzacji");
+        setIsLoading(false);
+        return;
+      }
+
+      const params = forceRefresh ? "?refresh=true" : "";
+      const response = await axios.get(`${API_BASE_URL}/subjects/${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Cała odpowiedź:", response);
+      console.log("Dane odpowiedzi:", response.data);
+      console.log("Wartość last_update:", response.data.last_update);
+      console.log("Typ last_update:", typeof response.data.last_update);
+
+      if (response.data.data) {
+        setSubjects(response.data.data);
+        setLastUpdate(response.data.last_update);
+
+        if (response.data.data.length > 0) {
+          const mastered = response.data.data.filter(
+            (subject) => subject.is_mastered,
+          );
+          setProgress(
+            Math.round((mastered.length / response.data.data.length) * 100),
+          );
+        }
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Błąd podczas pobierania przedmiotów:", error);
+    }
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchSubjects(true).finally(() => {
+      setIsRefreshing(false);
+    });
+  };
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchSubjects = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem("token");
+    if (isMounted && shouldRefresh) {
+      fetchSubjects();
+      setShouldRefresh(false);
+    }
 
-        if (!token) {
-          console.error("Brak tokenu autoryzacji");
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await axios.get(`${API_BASE_URL}/subjects/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (isMounted) {
-          setSubjects(response.data);
-
-          // Obliczanie postępu
-          if (response.data.length > 0) {
-            const mastered = response.data.filter(
-              (subject) => subject.is_mastered,
-            );
-            setProgress(
-              Math.round((mastered.length / response.data.length) * 100),
-            );
-          }
-
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Błąd podczas pobierania przedmiotów:", error);
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchSubjects();
-
-    // Funkcja czyszcząca
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [shouldRefresh]);
 
   const handleToggleIgnore = async (subjectId) => {
     console.log(`Przełączenie ignorowania dla przedmiotu ${subjectId}`);
@@ -277,10 +293,39 @@ const DashboardPage = () => {
             transition={{ delay: 0.1 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 lg:col-span-3"
           >
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
-              <FaBook className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
-              Najbliższe zajęcia
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
+                <FaBook className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
+                Najbliższe zajęcia
+              </h2>
+              <div className="flex items-center">
+                {lastUpdate && (
+                  <span className="text-sm text-gray-500 dark:text-gray-300 mr-2">
+                    Ostatnia aktualizacja:{" "}
+                    {(() => {
+                      try {
+                        return new Date(lastUpdate).toLocaleString("pl-PL");
+                      } catch (e) {
+                        console.error("Błąd formatu daty:", e);
+                        return "niedostępna";
+                      }
+                    })()}
+                  </span>
+                )}
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-700"
+                  title="Odśwież plan zajęć"
+                >
+                  {isRefreshing ? (
+                    <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+                  ) : (
+                    <FaSyncAlt />
+                  )}
+                </button>
+              </div>
+            </div>
 
             {isLoading ? (
               <div className="flex justify-center items-center h-64">
@@ -384,7 +429,10 @@ const DashboardPage = () => {
               </div>
             ) : (
               <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-                <p>Brak nadchodzących zajęć.</p>
+                <p>
+                  Brak nadchodzących zajęć. W wybranym okresie nie ma
+                  zaplanowanych zajęć lub jeszcze nie zostały opublikowane.
+                </p>
               </div>
             )}
           </motion.div>

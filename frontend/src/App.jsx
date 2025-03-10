@@ -10,7 +10,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
-import MyMaterialsPage from "./pages/MyMaterialsPage.jsx";
+import MySubjectsPage from "./pages/MySubjectsPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -58,10 +58,10 @@ const AppContent = () => {
               }
             />
             <Route
-              path="/my-materials"
+              path="/my-subjects"
               element={
                 <ProtectedRoute>
-                  <MyMaterialsPage />
+                  <MySubjectsPage />
                 </ProtectedRoute>
               }
             />
