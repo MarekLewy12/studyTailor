@@ -159,28 +159,31 @@ def get_subjects(request):
                 planner = StudyPlanner()
                 schedule_data = planner.get_schedule(user.album_number)
 
-                existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
+                if schedule_data and len(schedule_data) > 0:
+                    existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
 
-                for item in schedule_data:
-                    subject, created = Subject.objects.update_or_create(
-                        user=user,
-                        name=item['subject'],
-                        lesson_form=item['lesson_form'],
-                        start_datetime=item['start_datetime'],
-                        defaults={
-                            'end_datetime': item['end_datetime']
-                        }
-                    )
+                    for item in schedule_data:
+                        subject, created = Subject.objects.update_or_create(
+                            user=user,
+                            name=item['subject'],
+                            lesson_form=item['lesson_form'],
+                            start_datetime=item['start_datetime'],
+                            defaults={
+                                'end_datetime': item['end_datetime']
+                            }
+                        )
 
-                    if not created:
-                        existing_subjects = existing_subjects.exclude(id=subject.id)
+                        if not created:
+                            existing_subjects = existing_subjects.exclude(id=subject.id)
 
-                existing_subjects.delete()
+                    existing_subjects.delete()
 
-                if hasattr(user, 'profile'):
-                    user.profile.last_schedule_update = datetime.now()
-                    user.profile.save()
-                    last_update = user.profile.last_schedule_update
+                    if hasattr(user, 'profile'):
+                        user.profile.last_schedule_update = datetime.now()
+                        user.profile.save()
+                        last_update = user.profile.last_schedule_update
+                else:
+                    print("Puste dane z API - zachowuję poprzednie przedmioty")
 
             except Exception as e:
                 print(f"Błąd podczas pobierania planu zajęć: {e}")
