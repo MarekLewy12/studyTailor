@@ -137,21 +137,18 @@ def login_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_subjects(request):
-    """
-    Pobiera plan zajęć z API ZUT i zapisuje jako przedmioty w bazie.
-    """
     try:
         user = request.user
         force_refresh = request.query_params.get('refresh', 'false').lower() == 'true'
 
         has_subjects = Subject.objects.filter(user=user).exists()
-
         last_update = user.profile.last_schedule_update if hasattr(user, 'profile') else None
+
         needs_update = (
-            force_refresh or
-            not has_subjects or
-            not last_update or
-            datetime.now() - last_update > timedelta(days=1)
+                force_refresh or
+                not has_subjects or
+                not last_update or
+                datetime.now() - last_update > timedelta(days=1)
         )
 
         if needs_update:
@@ -159,8 +156,8 @@ def get_subjects(request):
                 planner = StudyPlanner()
                 schedule_data = planner.get_schedule(user.album_number)
 
-                if schedule_data and len(schedule_data) > 0:
-                    existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
+                if schedule_data:
+                    preserved_ids = []
 
                     for item in schedule_data:
                         subject, created = Subject.objects.update_or_create(
@@ -172,19 +169,20 @@ def get_subjects(request):
                                 'end_datetime': item['end_datetime']
                             }
                         )
+                        preserved_ids.append(subject.id)
 
-                        if not created:
-                            existing_subjects = existing_subjects.exclude(id=subject.id)
+                    if preserved_ids:
+                        Subject.objects.filter(
+                            user=user,
+                            is_mastered=False
+                        ).exclude(
+                            id__in=preserved_ids
+                        ).delete()
 
-                    existing_subjects.delete()
-
-                    if hasattr(user, 'profile'):
-                        user.profile.last_schedule_update = datetime.now()
-                        user.profile.save()
-                        last_update = user.profile.last_schedule_update
-                else:
-                    print("Puste dane z API - zachowuję poprzednie przedmioty")
-
+                if hasattr(user, 'profile'):
+                    user.profile.last_schedule_update = datetime.now()
+                    user.profile.save()
+                    last_update = user.profile.last_schedule_update
             except Exception as e:
                 print(f"Błąd podczas pobierania planu zajęć: {e}")
 
