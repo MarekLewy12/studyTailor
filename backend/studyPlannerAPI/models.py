@@ -88,3 +88,11 @@ class StudySession(models.Model):
 
     def __str__(self):
         return f"Sesja nauki: {self.subject.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    last_schedule_update = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Profil użytkownika: {self.user.username}"

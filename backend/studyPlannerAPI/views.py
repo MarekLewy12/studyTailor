@@ -13,7 +13,7 @@ from studyPlanner.services import StudyPlanner
 
 from django.conf import settings
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from .models import Subject, Material, StudySession
 from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer
@@ -141,34 +141,53 @@ def get_subjects(request):
     Pobiera plan zajęć z API ZUT i zapisuje jako przedmioty w bazie.
     """
     try:
-        album_number = request.user.album_number
+        user = request.user
+        force_refresh = request.query_params.get('refresh', 'false').lower() == 'true'
 
-        if not album_number:
-            return Response({"error": "Brak numeru albumu"}, status=400)
+        has_subjects = Subject.objects.filter(user=user).exists()
 
-        # Wykorzystaj istniejącą funkcję do pobierania planu
-        planner = StudyPlanner()
-        schedule_data = planner.get_schedule(album_number)
+        last_update = user.profile.last_schedule_update if hasattr(user, 'profile') else None
+        needs_update = (
+            force_refresh or
+            not has_subjects or
+            not last_update or
+            datetime.now() - last_update > timedelta(days=1)
+        )
 
-        # Usuń stare przedmioty dla tego użytkownika
-        Subject.objects.filter(user=request.user).delete()
+        if needs_update:
+            planner = StudyPlanner()
+            schedule_data = planner.get_schedule(user.album_number)
 
-        # Zapisz nowe przedmioty
-        for item in schedule_data:
-            Subject.objects.create(
-                user=request.user,
-                name=item['subject'],
-                lesson_form=item['lesson_form'],
-                start_datetime=item['start_datetime'],
-                end_datetime=item['end_datetime']
-            )
+            existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
 
-        # Pobierz zapisane przedmioty i zwróć je
-        subjects = Subject.objects.filter(user=request.user).order_by('start_datetime')
+            for item in schedule_data:
+                subject, created = Subject.objects.update_or_create(
+                    user=user,
+                    name=item['subject'],
+                    lesson_form=item['lesson_form'],
+                    start_datetime=item['start_datetime'],
+                    defaults={
+                        'end_datetime': item['end_datetime']
+                    }
+                )
+
+                if not created:
+                    existing_subjects = existing_subjects.exclude(id=subject.id)
+
+            existing_subjects.delete()
+
+            if hasattr(user, 'profile'):
+                user.profile.last_schedule_update = datetime.now()
+                user.profile.save()
+
+        subjects = Subject.objects.filter(user=user).order_by('start_datetime')
         serializer = SubjectSerializer(subjects, many=True)
 
-        return Response(serializer.data)
-
+        return Response({
+            'data': serializer.data,
+            'last_update': last_update.isoformat() if last_update else None,
+            'refreshed': needs_update
+        })
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
