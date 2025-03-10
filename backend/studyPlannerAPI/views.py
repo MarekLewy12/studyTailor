@@ -159,10 +159,6 @@ def get_subjects(request):
                 planner = StudyPlanner()
                 schedule_data = planner.get_schedule(user.album_number)
 
-                if hasattr(user, 'profile'):
-                    user.profile.last_schedule_update = datetime.now()
-                    user.profile.save()
-
                 existing_subjects = Subject.objects.filter(user=user, is_mastered=False)
 
                 for item in schedule_data:
@@ -184,6 +180,8 @@ def get_subjects(request):
                 if hasattr(user, 'profile'):
                     user.profile.last_schedule_update = datetime.now()
                     user.profile.save()
+                    last_update = user.profile.last_schedule_update
+
             except Exception as e:
                 print(f"Błąd podczas pobierania planu zajęć: {e}")
 
@@ -192,7 +190,7 @@ def get_subjects(request):
 
         return Response({
             'data': serializer.data,
-            'last_update': last_update.isoformat() if last_update else None,
+            'last_update': last_update.isoformat() if last_update else datetime.now().isoformat(),
             'refreshed': needs_update,
             'empty_response': len(subjects) == 0
         })
