@@ -1,10 +1,12 @@
 import React, { createContext, useState, useEffect } from "react";
+import { useNotification } from "./NotificationContext.jsx";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { addNotification } = useNotification();
 
   // Sprawdź token przy pierwszym ładowaniu
   useEffect(() => {
@@ -21,12 +23,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = () => {
     setIsAuthenticated(true);
+    addNotification("Pomyślnie zalogowano!", "success");
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     setIsAuthenticated(false);
+    addNotification("Pomyślnie wylogowano!", "info");
   };
 
   if (isLoading) {

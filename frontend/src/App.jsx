@@ -14,6 +14,8 @@ import MySubjectsPage from "./pages/MySubjectsPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
+import NotificationContainer from "./components/NotificationContainer.jsx";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = React.useContext(AuthContext);
@@ -32,6 +34,7 @@ const AppContent = () => {
   return (
     <div className="app">
       <Navbar />
+      <NotificationContainer /> {/* Kontener na powiadomienia */}
       <TransitionGroup>
         <CSSTransition key={location.key} classNames="page" timeout={300}>
           <Routes location={location}>
@@ -77,11 +80,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <NotificationProvider>
+      <AuthProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </NotificationProvider>
   );
 };
 
