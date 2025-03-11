@@ -12,6 +12,7 @@ import {
   FaFilter,
   FaUserCog,
   FaSyncAlt,
+  FaGraduationCap,
 } from "react-icons/fa";
 import { API_BASE_URL } from "../config.js";
 
@@ -167,7 +168,7 @@ const DashboardPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-6xl font-bold text-gray-800 dark:text-blue-300 mb-6 text-center mt-4"
         >
-          Twój Dashboard
+          Dashboard
         </motion.h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -404,22 +405,6 @@ const DashboardPage = () => {
                                 <FaEyeSlash />
                               </button>
                             </div>
-                          </div>
-
-                          <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
-                            <Link
-                              to={`/subject/${subject.id}/materials`}
-                              className="inline-flex items-center px-3 py-1 bg-white dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
-                            >
-                              <FaDownload className="mr-1" /> Materiały (
-                              {subject.materials_count})
-                            </Link>
-                            <Link
-                              to={`/subject/${subject.id}/assistant`}
-                              className="inline-flex items-center px-3 py-1 bg-white dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
-                            >
-                              <FaRobot className="mr-1" /> Ucz się z AI
-                            </Link>
                           </div>
                         </div>
                       ))}
