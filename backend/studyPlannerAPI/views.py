@@ -322,23 +322,36 @@ def material_download(request, subject_id, material_id):
     try:
         subject = Subject.objects.get(pk=subject_id, user=request.user)
         material = Material.objects.get(pk=material_id, subject=subject)
+
+        if not material.file:
+            return Response({"error": "Brak pliku do pobrania"}, status=404)
+
+        import os
+        file_path = material.file.path
+
+        if not os.path.exists(file_path):
+            return Response({"error": "Plik nie istnieje"}, status=404)
+
+        from django.http import FileResponse
+        return FileResponse(
+            open(file_path, 'rb'),
+            as_attachment=True,
+            filename=os.path.basename(material.file.name)
+        )
+
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)
     except Material.DoesNotExist:
         return Response({"error": "Materiał nie istnieje"}, status=404)
 
-    if not material.file:
-        return Response({"error": "Brak pliku do pobrania"}, status=404)
-
-    file_path = material.file.path
-
-    try:
-        with open(file_path, 'rb') as file:
-            response = Response(file.read(), content_type='application/octet-stream')
-            response['Content-Disposition'] = f'attachment; filename="{material.file.name}"'
-            return response
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        import traceback
+        print(f"Błąd podczas pobierania pliku: {str(e)}")
+        print(traceback.format_exc())
+        return Response({"error": f"Błąd serwera: {str(e)}"}, status=500)
+
+
+
 
 
 @api_view(['DELETE'])
