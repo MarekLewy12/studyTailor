@@ -62,12 +62,16 @@ class Subject(models.Model):
         return f"{self.name} ({self.start_datetime.strftime('%Y-%m-%d %H:%M')})"
 
 
+def user_directory_path(instance, filename):
+    return 'materials/user_{0}/{1}'.format(instance.subject.user.id, filename)
+
+
 class Material(models.Model):
     """Materiały do nauki dla przedmiotu"""
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='materials')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    file = models.FileField(upload_to='materials/', blank=True, null=True)
+    file = models.FileField(upload_to=user_directory_path, blank=True, null=True)
     link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

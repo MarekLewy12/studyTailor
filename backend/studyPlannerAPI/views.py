@@ -290,10 +290,26 @@ def materials(request, subject_id):
         return Response(serializer.data)
 
     elif request.method == 'POST':
+        print(f"Otrzymano żądanie POST z danymi: {request.data}")
         serializer = MaterialSerializer(data=request.data)
+
         if serializer.is_valid():
-            serializer.save(subject=subject)
+            instance = serializer.save(subject=subject, commit=False)
+
+            if 'file' in request.FILES:
+                file = request.FILES['file']
+                print(f"Przesyłanie pliku: {file.name}, rozmiar: {file.size} bajtów")
+                instance.file = file
+
+            instance.save()
+
+            if instance.file:
+                print(f"Plik został zapisany pod kluczem: {instance.file.name}")
+                print(f"URL pliku: {instance.file.url}")
+
             return Response(serializer.data, status=201)
+
+        print(f"Błędy walidacji: {serializer.errors}")
         return Response(serializer.errors, status=400)
 
 
@@ -325,7 +341,10 @@ def material_download(request, subject_id, material_id):
         if not material.file:
             return Response({"error": "Brak pliku do pobrania"}, status=404)
 
-        # Generowanie podpisanego URL z czasem ważności 3600 sekund (1 godzina)
+        print(f"Próba pobrania pliku: {material.title}")
+        print(f"Ścieżka pliku w S3: {material.file.name}")
+        print(f"URL pliku: {material.file.url if material.file else 'Brak URL'}")
+
         import boto3
         from botocore.config import Config
 
@@ -339,19 +358,36 @@ def material_download(request, subject_id, material_id):
 
         file_key = material.file.name
 
-        presigned_url = s3_client.generate_presigned_url(
-            'get_object',
-            Params={
-                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-                'Key': file_key
-            },
-            ExpiresIn=3600
-        )
+        access_key = settings.AWS_ACCESS_KEY_ID
+        secret_key = settings.AWS_SECRET_ACCESS_KEY if settings.AWS_SECRET_ACCESS_KEY else "Brak klucza"
+        masked_secret = secret_key[:4] + "..." + secret_key[-4:] if len(secret_key) > 8 else "Zbyt krótki"
 
-        return Response({
-            "file_url": presigned_url,
-            "filename": os.path.basename(material.file.name)
-        })
+        print(f"Access Key: {access_key}")
+        print(f"Secret Key (zamaskowany): {masked_secret}")
+        print(f"Bucket: {settings.AWS_STORAGE_BUCKET_NAME}")
+        print(f"Region: {settings.AWS_S3_REGION_NAME}")
+        print(f"Klucz pliku: {file_key}")
+
+        try:
+            presigned_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                    'Key': file_key
+                },
+                ExpiresIn=3600
+            )
+
+            print(f"Wygenerowany URL: {presigned_url[:50]}...")
+
+            return Response({
+                "file_url": presigned_url,
+                "filename": os.path.basename(material.file.name)
+            })
+
+        except Exception as s3_error:
+            print(f"Błąd podczas generowania URL do S3: {str(s3_error)}")
+            raise s3_error
 
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)

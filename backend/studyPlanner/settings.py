@@ -200,8 +200,8 @@ CORS_ALLOW_METHODS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Konfiguracja przechowywania plików
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Konfiguracja AWS S3
 load_dotenv()
@@ -213,8 +213,4 @@ AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-north-1')
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_S3_VERIFY = True
-
 AWS_LOCATION = 'media'
-
-# Konfiguracja przechowywania plików
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
