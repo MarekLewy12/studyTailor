@@ -318,7 +318,6 @@ def verify_album_number(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def material_download(request, subject_id, material_id):
-    """Pobieranie pliku materiału"""
     try:
         subject = Subject.objects.get(pk=subject_id, user=request.user)
         material = Material.objects.get(pk=material_id, subject=subject)
@@ -326,32 +325,42 @@ def material_download(request, subject_id, material_id):
         if not material.file:
             return Response({"error": "Brak pliku do pobrania"}, status=404)
 
-        import os
-        file_path = material.file.path
+        # Generowanie podpisanego URL z czasem ważności 3600 sekund (1 godzina)
+        import boto3
+        from botocore.config import Config
 
-        if not os.path.exists(file_path):
-            return Response({"error": "Plik nie istnieje"}, status=404)
-
-        from django.http import FileResponse
-        return FileResponse(
-            open(file_path, 'rb'),
-            as_attachment=True,
-            filename=os.path.basename(material.file.name)
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME,
+            config=Config(signature_version='s3v4')
         )
+
+        file_key = material.file.name
+
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': file_key
+            },
+            ExpiresIn=3600
+        )
+
+        return Response({
+            "file_url": presigned_url,
+            "filename": os.path.basename(material.file.name)
+        })
 
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)
     except Material.DoesNotExist:
         return Response({"error": "Materiał nie istnieje"}, status=404)
-
     except Exception as e:
         import traceback
-        print(f"Błąd podczas pobierania pliku: {str(e)}")
         print(traceback.format_exc())
-        return Response({"error": f"Błąd serwera: {str(e)}"}, status=500)
-
-
-
+        return Response({"error": f"Błąd: {str(e)}"}, status=500)
 
 
 @api_view(['DELETE'])
