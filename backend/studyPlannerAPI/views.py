@@ -1,3 +1,5 @@
+import os.path
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import JSONParser
 from rest_framework import status, generics, permissions
@@ -311,3 +313,53 @@ def verify_album_number(request):
 
     except Exception as e:
         return Response({"valid": False, "message": str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def material_download(request, subject_id, material_id):
+    """Pobieranie pliku materiału"""
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+        material = Material.objects.get(pk=material_id, subject=subject)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+    except Material.DoesNotExist:
+        return Response({"error": "Materiał nie istnieje"}, status=404)
+
+    if not material.file:
+        return Response({"error": "Brak pliku do pobrania"}, status=404)
+
+    file_path = material.file.path
+
+    try:
+        with open(file_path, 'rb') as file:
+            response = Response(file.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = f'attachment; filename="{material.file.name}"'
+            return response
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def material_delete(request, subject_id, material_id):
+    """Usuwanie materiału oraz pliku z dysku"""
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+        material = Material.objects.get(pk=material_id, subject=subject)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+    except Material.DoesNotExist:
+        return Response({"error": "Materiał nie istnieje"}, status=404)
+
+    # usunięcie pliku z dysku
+    if material.file:
+        try:
+            if os.path.isfile(material.file.path):
+                os.remove(material.file.path)
+        except Exception as e:
+            return Response({"Błąd podczas pobierania pliku": str(e)}, status=500)
+
+    material.delete() # usuń z bazy danych
+    return Response(status=204)
