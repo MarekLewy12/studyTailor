@@ -318,7 +318,7 @@ def verify_album_number(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def material_download(request, subject_id, material_id):
-    """Pobieranie pliku materiału"""
+    """Pobieranie pliku materiału z S3"""
     try:
         subject = Subject.objects.get(pk=subject_id, user=request.user)
         material = Material.objects.get(pk=material_id, subject=subject)
@@ -326,38 +326,24 @@ def material_download(request, subject_id, material_id):
         if not material.file:
             return Response({"error": "Brak pliku do pobrania"}, status=404)
 
-        import os
-        file_path = material.file.path
+        file_url = material.file.url
 
-        if not os.path.exists(file_path):
-            return Response({"error": "Plik nie istnieje"}, status=404)
-
-        from django.http import FileResponse
-        return FileResponse(
-            open(file_path, 'rb'),
-            as_attachment=True,
-            filename=os.path.basename(material.file.name)
-        )
-
+        return Response({
+            "file_url": file_url,
+            "filename": os.path.basename(material.file.name)
+        })
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)
     except Material.DoesNotExist:
         return Response({"error": "Materiał nie istnieje"}, status=404)
-
     except Exception as e:
-        import traceback
-        print(f"Błąd podczas pobierania pliku: {str(e)}")
-        print(traceback.format_exc())
-        return Response({"error": f"Błąd serwera: {str(e)}"}, status=500)
-
-
-
+        return Response({"error": str(e)}, status=500)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def material_delete(request, subject_id, material_id):
-    """Usuwanie materiału oraz pliku z dysku"""
+    """Usuwanie materiału oraz pliku z S3"""
     try:
         subject = Subject.objects.get(pk=subject_id, user=request.user)
         material = Material.objects.get(pk=material_id, subject=subject)
@@ -366,13 +352,5 @@ def material_delete(request, subject_id, material_id):
     except Material.DoesNotExist:
         return Response({"error": "Materiał nie istnieje"}, status=404)
 
-    # usunięcie pliku z dysku
-    if material.file:
-        try:
-            if os.path.isfile(material.file.path):
-                os.remove(material.file.path)
-        except Exception as e:
-            return Response({"Błąd podczas pobierania pliku": str(e)}, status=500)
-
-    material.delete() # usuń z bazy danych
+    material.delete()
     return Response(status=204)
