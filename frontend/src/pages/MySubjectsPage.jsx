@@ -10,12 +10,25 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { API_BASE_URL } from "../config.js";
+import MaterialsPanel from "../components/MaterialsPanel.jsx";
 
 const MySubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all"); // 'all', 'lecture', 'lab', 'exercise'
+
+  const [materialsVisible, setMaterialsVisible] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+
+  const openMaterialsPanel = (subject) => {
+    setSelectedSubject(subject);
+    setMaterialsVisible(true);
+  };
+
+  const closeMaterialsPanel = () => {
+    setMaterialsVisible(false);
+  };
 
   const fetchSubjects = async () => {
     try {
@@ -77,6 +90,11 @@ const MySubjectsPage = () => {
 
   return (
     <div className="min-h-screen pt-20 px-4 bg-gray-50 dark:bg-gray-900">
+      <MaterialsPanel
+        isOpen={materialsVisible}
+        onClose={closeMaterialsPanel}
+        subject={selectedSubject}
+      />
       <div className="container mx-auto">
         <h1 className="text-6xl font-bold text-center text-gray-800 dark:text-blue-300 mb-6 mt-4">
           Przedmioty
@@ -267,12 +285,14 @@ const MySubjectsPage = () => {
                           </div>
 
                           <div className="flex justify-between mt-auto pt-4">
-                            <Link
-                              to={`/subject/${subjectGroup[0].id}/materials`}
+                            <button
+                              onClick={() =>
+                                openMaterialsPanel(subjectGroup[0])
+                              }
                               className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center"
                             >
                               <FaBook className="mr-2" /> Materiały
-                            </Link>
+                            </button>
                             <Link
                               to={`/subject/${subjectGroup[0].id}/assistant`}
                               className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center"
