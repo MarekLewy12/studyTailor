@@ -14,6 +14,7 @@ from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializ
 from studyPlanner.services import StudyPlanner
 
 from django.conf import settings
+from django.http import HttpResponse
 import json
 from datetime import datetime, date, timedelta
 
@@ -341,12 +342,15 @@ def material_download(request, subject_id, material_id):
         if not material.file:
             return Response({"error": "Brak pliku do pobrania"}, status=404)
 
-        file_url = material.file.url
+        file_name = os.path.basename(material.file.name)
+        file_content = material.file.read()
 
-        return Response({
-            "file_url": file_url,
-            "filename": os.path.basename(material.file.name)
-        })
+        response = HttpResponse(file_content)
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+        response['Content-Type'] = 'application/octet-stream'
+
+        return response
+
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)
     except Material.DoesNotExist:
