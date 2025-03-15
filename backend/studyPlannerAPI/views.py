@@ -290,11 +290,26 @@ def materials(request, subject_id):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = MaterialSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(subject=subject)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        try:
+            print("==== DEBUG: Dodawanie materiału ====")
+            print("Content-Type:", request.content_type)
+            print("FILES:", request.FILES)
+            print("POST data:", request.POST)
+
+            serializer = MaterialSerializer(data=request.data)
+            if serializer.is_valid():
+                print("Serializer valid, fields:", serializer.validated_data)
+                material = serializer.save(subject=subject)
+                print("Material saved successfully, ID:", material.id)
+                return Response(serializer.data, status=201)
+            else:
+                print("Validation errors:", serializer.errors)
+                return Response(serializer.errors, status=400)
+        except Exception as e:
+            import traceback
+            print("Exception during file upload:", str(e))
+            print(traceback.format_exc())
+            return Response({"error": str(e)}, status=500)
 
 
 @api_view(['POST'])
