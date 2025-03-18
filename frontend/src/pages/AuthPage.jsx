@@ -127,7 +127,7 @@ const AuthPage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="flex-1 bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden py-20"
+        className="flex-1 inset-0 bg-gradient-to-tr from-purple-500 to-blue-400 animate-gradient relative overflow-hidden py-20"
       >
         <div className="relative h-full flex flex-col justify-center items-center p-8 text-center">
           <motion.div
@@ -137,9 +137,9 @@ const AuthPage = () => {
             className="mb-8"
           >
             <img
-              src="/study_logo_orange_no_text.png"
+              src="/new_logo_big.png"
               alt="Logo"
-              className="w-32 h-32 md:w-40 md:h-40 mx-auto"
+              className="w-64 h-32 md:w-80 md:h-40 mx-auto"
             />
           </motion.div>
 
