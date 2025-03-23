@@ -421,7 +421,7 @@ def subject_assistant(request, subject_id):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_chat_history(request, subject_id):
     """
