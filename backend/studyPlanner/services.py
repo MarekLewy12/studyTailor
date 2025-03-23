@@ -426,6 +426,11 @@ class DeepseekAIService:
         Jeśli nie znasz odpowiedzi na pytanie, przyznaj to zamiast wymyślać informacje.
         Używaj przykładów, gdy to pomocne.
         
+        Formatuj wzory matematyczne używając składni LaTeX:
+        - Dla wzorów inline użyj $wzór$
+        - Dla wzorów w osobnej linii użyj $$wzór$$
+        Pisz zwięźle i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
+        
         Odpowiadaj w języku polskim.
         """
 
