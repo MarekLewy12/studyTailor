@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { API_BASE_URL } from "../config.js";
 import MaterialsPanel from "../components/MaterialsPanel.jsx";
+import AIChatPanel from "../components/AIChatPanel.jsx";
 
 const MySubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -20,6 +21,19 @@ const MySubjectsPage = () => {
 
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
+
+  const [aiChatVisible, setAiChatVisible] = useState(false);
+  const [selectedAiSubject, setSelectedAiSubject] = useState(null);
+
+  const openAiChatPanel = (subject) => {
+        setSelectedAiSubject(subject);
+        setAiChatVisible(true);
+    }
+
+
+    const closeAiChatPanel = () => {
+        setAiChatVisible(false);
+    }
 
   const openMaterialsPanel = (subject) => {
     setSelectedSubject(subject);
@@ -90,6 +104,13 @@ const MySubjectsPage = () => {
 
   return (
     <div className="min-h-screen pt-20 px-4 bg-gray-50 dark:bg-gray-900">
+
+      <AIChatPanel
+        isOpen={aiChatVisible}
+        onClose={closeAiChatPanel}
+        subject={selectedAiSubject}
+        />
+
       <MaterialsPanel
         isOpen={materialsVisible}
         onClose={closeMaterialsPanel}
@@ -293,12 +314,12 @@ const MySubjectsPage = () => {
                             >
                               <FaBook className="mr-2" /> Materiały
                             </button>
-                            <Link
-                              to={`/subject/${subjectGroup[0].id}/assistant`}
+                            <button
+                              onClick={() => openAiChatPanel(subjectGroup[0])}
                               className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center"
                             >
                               <FaRobot className="mr-2" /> AI
-                            </Link>
+                            </button>
                           </div>
                         </div>
                       </div>
