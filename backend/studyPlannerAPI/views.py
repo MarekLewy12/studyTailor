@@ -404,7 +404,7 @@ def subject_assistant(request, subject_id):
         )
 
         # zapisanie do bazy
-        StudySession.objects.create(
+        study_session = StudySession.objects.create(
             user=request.user,
             subject=subject,
             questions=question,
@@ -414,8 +414,50 @@ def subject_assistant(request, subject_id):
         return Response({
             "subject": subject.name,
             "question": question,
-            "answer": answer
+            "answer": answer,
+            "timestamp": study_session.created_at.isoformat()
         })
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_chat_history(request, subject_id):
+    """
+    Pobieranie historii czatu dla konkretnego przedmiotu
+    """
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+
+    sessions = StudySession.objects.filter(
+        user=request.user,
+        subject=subject
+    ).order_by(
+        'created_at'
+    )
+
+    messages = []
+
+    if not sessions.exists():
+        messages.append({
+            "sender": "ai",
+            "text": f"Witaj! Jak mogę Ci pomóc w nauce przedmiotu {subject.name}?",
+            "timestamp": datetime.now().isoformat()
+        })
+    else:
+        for session in sessions:
+            messages.append({
+                "sender": "user",
+                "text": session.questions,
+                "timestamp": session.created_at.isoformat()
+            })
+            messages.append({
+                "sender": "ai",
+                "text": session.answers,
+                "timestamp": session.created_at.isoformat()
+            })
+
+    return Response(messages)

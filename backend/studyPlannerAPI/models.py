@@ -83,8 +83,13 @@ class StudySession(models.Model):
     answers = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    message_type = models.CharField(max_length=20, default='question_answer')
+
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'subject'])
+        ]
 
     def __str__(self):
         return f"Sesja nauki: {self.subject.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"

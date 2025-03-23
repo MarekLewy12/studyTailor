@@ -25,6 +25,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
+from studyPlannerAPI.views import get_chat_history
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -56,6 +57,7 @@ urlpatterns = [
     path('subjects/<int:subject_id>/materials/<int:material_id>/download/', views.material_download, name='material_download'),
     path('subjects/<int:subject_id>/materials/<int:material_id>/', views.material_delete, name='material_delete'),
     path('subject/<int:subject_id>/assistant/', subject_assistant, name='subject_assistant'),
+    path('subject/<int:subject_id>/chat-history/', get_chat_history, name='get_chat_history'),
 
 ]
 
