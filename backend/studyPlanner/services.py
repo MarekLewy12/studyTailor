@@ -2,6 +2,8 @@ import openai
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
+
+from openai import OpenAI
 from tabulate import tabulate
 import json
 import os
@@ -340,3 +342,93 @@ class StudyPlanner:
 
         print("\nHarmonogram nauki:")
         print(tabulate(study_plan, headers="keys", tablefmt="psql", showindex=False))
+
+
+class DeepseekAIService:
+    """
+    Serwis do integracji z API Deepseek-chat
+    """
+    def __init__(self, api_key):
+        self.api_key = api_key or os.getenv('DEEPSEEK_API_KEY')
+        if not self.api_key:
+            raise ValueError(
+                "Brak klucza API Deepseek. Upewnij się, że zmienna środowiskowa DEEPSEEK_API_KEY jest ustawiona."
+            )
+
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://api.deepseek.com/",
+        )
+
+    def generate_response(self, prompt, system_prompt=None, temperature=0.7, max_tokens=2048):
+        """
+        Generuje odpowiedź od modelu Deepseek
+
+        Args:
+            prompt (str): Zapytanie użytkownika
+            system_prompt (str, optional): Instrukcja systemowa dla modelu
+            temperature (float, optional): Parametr losowości odpowiedzi (0.0-1.0)
+            max_tokens (int, optional): Maksymalna długość odpowiedzi
+            stream (bool, optional): Czy odpowiedź ma być strumieniowa
+
+        Returns:
+            str: Odpowiedź modelu
+        """
+        if system_prompt is None:
+            system_prompt = "Jesteś pomocnym asystentem nauki, który udziela rzeczowych i dokładnych odpowiedzi."
+
+        try:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+
+            response = self.client.chat.completions.create(
+                model="deepseek-chat",
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"Błąd podczas komunikacji z API Deepseek: {str(e)}")
+
+            return "Przepraszam, wystąpił problem z połączeniem do asystenta AI. Spróbuj ponownie później."
+
+    def generate_study_assistant_response(self, subject_name, question, subject_type=None):
+        """
+        Generuje odpowiedź od modelu Deepseek dla asystenta nauki
+
+        Args:
+            subject_name (str): Nazwa przedmiotu
+            question (str): Zadane pytanie
+            subject_type (str, optional): Typ przedmiotu (np. "wykład", "laboratorium")
+
+        Returns:
+            str: Odpowiedź asystenta nauki
+        """
+        subject_context = f"Przedmiotu: '{subject_name}'"
+        if subject_type:
+            subject_context += f" ({subject_type})"
+
+        system_prompt = f"""
+        Jesteś asystentem nauki specjalizującym się w {subject_context}. 
+        Twoje zadanie to pomagać studentom i uczniom w zrozumieniu materiału, wyjaśniać trudne koncepcje 
+        i wspierać proces nauki. Udzielaj rzeczowych, dokładnych odpowiedzi opartych na faktach.
+        
+        Twój ton powinien być:
+        - Profesjonalny, ale przyjazny
+        - Pomocny i cierpliwy
+        - Jasny i zwięzły, ale dokładny
+        
+        Jeśli nie znasz odpowiedzi na pytanie, przyznaj to zamiast wymyślać informacje.
+        Używaj przykładów, gdy to pomocne.
+        
+        Odpowiadaj w języku polskim.
+        """
+
+        prompt = f"Jako student uczący się {subject_context}, mam następujące pytanie: {question}"
+
+        return self.generate_response(prompt, system_prompt=system_prompt)

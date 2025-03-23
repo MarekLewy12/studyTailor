@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from studyPlannerAPI import views
-from studyPlannerAPI.views import root_view
+from studyPlannerAPI.views import root_view, subject_assistant
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
@@ -55,6 +55,7 @@ urlpatterns = [
     path('subjects/<int:subject_id>/materials/', views.materials, name='subject_materials'),
     path('subjects/<int:subject_id>/materials/<int:material_id>/download/', views.material_download, name='material_download'),
     path('subjects/<int:subject_id>/materials/<int:material_id>/', views.material_delete, name='material_delete'),
+    path('subject/<int:subject_id>/assistant/', subject_assistant, name='subject_assistant'),
 
 ]
 

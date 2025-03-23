@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from studyPlannerAPI.models import ModelRequest, CustomUser
 from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
 
-from studyPlanner.services import StudyPlanner
+from studyPlanner.services import StudyPlanner, DeepseekAIService
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -373,3 +373,49 @@ def material_delete(request, subject_id, material_id):
 
     material.delete()
     return Response(status=204)
+
+# ---------- DEEPSEEK ----------
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def subject_assistant(request, subject_id):
+    """
+    Endpoint do interakcji z asystentem AI dla konkretnego przedmiotu
+    """
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=404)
+
+    question = request.data.get('question')
+    if not question:
+        return Response({"error": "Brak pytania"}, status=400)
+
+    try:
+        api_key = os.getenv('DEEPSEEK_API_KEY')
+        if not api_key:
+            return Response({"error": "Brak klucza API DeepSeek"}, status=500)
+
+        ai_service = DeepseekAIService(api_key)
+
+        answer = ai_service.generate_study_assistant_response(
+            subject_name=subject.name,
+            question=question,
+            subject_type=subject.lesson_form
+        )
+
+        # zapisanie do bazy
+        StudySession.objects.create(
+            user=request.user,
+            subject=subject,
+            questions=question,
+            answers=answer
+        )
+
+        return Response({
+            "subject": subject.name,
+            "question": question,
+            "answer": answer
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
