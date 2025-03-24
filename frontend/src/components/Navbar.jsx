@@ -1,13 +1,6 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import {
-  FaCalendarAlt,
-  FaHome,
-  FaList,
-  FaMoon,
-  FaRobot,
-  FaSun,
-} from "react-icons/fa";
+import { FaHome, FaList, FaMoon, FaRobot, FaSun } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 

@@ -1,10 +1,10 @@
 import React from "react";
 import {
   BrowserRouter as Router,
+  Navigate,
   Route,
   Routes,
   useLocation,
-  Navigate,
 } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Navbar from "./components/Navbar";
@@ -13,7 +13,7 @@ import RegisterPage from "./pages/RegisterPage";
 import MySubjectsPage from "./pages/MySubjectsPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
-import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
+import { AuthContext, AuthProvider } from "./context/AuthContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import NotificationContainer from "./components/NotificationContainer.jsx";
 

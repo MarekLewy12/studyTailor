@@ -1,11 +1,10 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import { API_BASE_URL } from "../config.js";
 import ClipLoader from "react-spinners/ClipLoader";
-import { FaUserGraduate, FaLock, FaIdCard, FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaIdCard, FaLock, FaUserGraduate } from "react-icons/fa";
 
 const AuthPage = () => {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -27,12 +26,9 @@ const AuthPage = () => {
 
     setIsValidatingAlbum(true);
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/verify-album-number/`,
-        {
-          album_number: formData.albumNumber,
-        },
-      );
+      const response = await axios.post(`/verify-album-number/`, {
+        album_number: formData.albumNumber,
+      });
 
       if (!response.data.valid) {
         setAlbumWarning(
@@ -86,10 +82,7 @@ const AuthPage = () => {
             album_number: formData.albumNumber,
           };
 
-      const response = await axios.post(
-        `${API_BASE_URL}${endpoint}`,
-        requestData,
-      );
+      const response = await axios.post(endpoint, requestData);
 
       localStorage.setItem("token", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);

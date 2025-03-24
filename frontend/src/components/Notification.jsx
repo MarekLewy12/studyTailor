@@ -2,8 +2,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import {
   FaCheckCircle,
-  FaInfoCircle,
   FaExclamationTriangle,
+  FaInfoCircle,
   FaTimesCircle,
 } from "react-icons/fa";
 

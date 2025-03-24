@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+
 const HoverEffect = ({ children }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}

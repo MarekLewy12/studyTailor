@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState(null);

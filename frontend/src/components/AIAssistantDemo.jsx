@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaRobot, FaBookOpen, FaLightbulb, FaCheck } from "react-icons/fa";
+import { FaBookOpen, FaCheck, FaLightbulb, FaRobot } from "react-icons/fa";
 
 const AIAssistantDemo = () => {
   return (

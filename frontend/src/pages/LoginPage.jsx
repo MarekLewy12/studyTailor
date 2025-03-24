@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import AnimatedSection from "../components/AnimatedSection";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
-import { API_BASE_URL } from "../config.js";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -17,7 +16,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, {
+      const response = await axios.post(`/login/`, {
         username,
         password,
         album_number: albumNumber,

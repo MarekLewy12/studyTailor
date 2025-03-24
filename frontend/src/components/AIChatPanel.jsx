@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
-import { API_BASE_URL } from "../config.js";
 import {
-  FaRobot,
-  FaUserGraduate,
-  FaTimes,
+  FaChevronUp,
   FaPaperPlane,
-  FaSpinner,
   FaRegLightbulb,
+  FaRobot,
+  FaSpinner,
+  FaTimes,
+  FaUserGraduate,
 } from "react-icons/fa";
 
 const AIChatPanel = ({ isOpen, onClose, subject }) => {
@@ -19,6 +19,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   // Przewijanie czatu do najnowszej wiadomości
   const scrollToBottom = () => {
@@ -35,7 +36,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
         try {
           const token = localStorage.getItem("token");
           const response = await axios.get(
-            `${API_BASE_URL}/subject/${subject.id}/chat-history/`,
+            `/subject/${subject.id}/chat-history/`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -109,7 +110,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.post(
-        `${API_BASE_URL}/subject/${subject.id}/assistant/`,
+        `/subject/${subject.id}/assistant/`,
         { question: userMessage.text },
         {
           headers: {
@@ -148,24 +149,23 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
     if (!subject) return [];
 
     const basicSuggestions = [
-      "Wytłumacz mi kluczowe pojęcia z tego przedmiotu",
-      "Jakie są najważniejsze tematy do nauki?",
-      "Pomóż mi zrozumieć trudne zagadnienia",
-      "Przygotuj mnie do kolokwium",
+      "Jakie są podstawowe pojęcia związane z tym przedmiotem?",
+      "Wyjaśnij podstawy teoretyczne tego przedmiotu",
+      "Podaj przykłady praktycznego zastosowania wiedzy z tego przedmiotu",
     ];
 
     // Dodatkowe sugestie zależne od formy zajęć
     if (subject.lesson_form.toLowerCase() === "laboratorium") {
       return [
         ...basicSuggestions,
-        "Jak przygotować się do zajęć laboratoryjnych?",
-        "Pomóż mi zrozumieć ostatnie ćwiczenia",
+        "Jakie są typowe metody badawcze używane w tych laboratoriach?",
+        "Czego mogę się spodziewać na tych zajęciach laboratoryjnych?",
       ];
     } else if (subject.lesson_form.toLowerCase() === "wykład") {
       return [
         ...basicSuggestions,
-        "Streść najważniejsze zagadnienia z wykładu",
-        "Jakie pytania mogą pojawić się na egzaminie?",
+        "Jakie są główne obszary badań w tej dziedzinie?",
+        "Wymień znanych naukowców, którzy przyczynili się do rozwoju tej dziedziny",
       ];
     }
 
@@ -194,7 +194,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
               stiffness: 250,
               mass: 0.8,
             }}
-            className="fixed left-0 top-0 bottom-0 w-full sm:w-96 md:w-1/3 lg:w-1/3 bg-white dark:bg-gray-800 shadow-xl z-50 flex flex-col"
+            className="fixed left-0 top-0 bottom-0 w-full sm:w-96 md:w-1/3 lg:w-1/2 bg-white dark:bg-gray-800 shadow-xl z-50 flex flex-col"
           >
             {/* NAGŁÓWEK */}
             <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex justify-between items-center">
@@ -305,21 +305,55 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                 <div className="flex items-center mb-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
                   <FaRegLightbulb className="mr-1" />
                   <span>Przykładowe pytania:</span>
+                  <button
+                    onClick={() => setShowSuggestions(!showSuggestions)}
+                    className="ml-auto text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/50 p-1 rounded transition-colors"
+                    title={
+                      showSuggestions ? "Ukryj sugestie" : "Pokaż sugestie"
+                    }
+                  >
+                    <FaChevronUp
+                      size={18}
+                      className={`transform transition-transform duration-300 ${
+                        showSuggestions ? "" : "rotate-180"
+                      }`}
+                    />
+                  </button>
                 </div>
-                <div className="grid grid-cols-1 gap-2">
-                  {getSuggestions().map((suggestion, index) => (
-                    <button
-                      key={index}
-                      className="text-left text-xs p-2 bg-white dark:bg-gray-700 rounded border border-indigo-200 dark:border-indigo-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-colors"
-                      onClick={() => {
-                        setInput(suggestion);
-                        inputRef.current?.focus();
+
+                <AnimatePresence>
+                  {showSuggestions && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+                      animate={{
+                        opacity: 1,
+                        height: "auto",
+                        overflow: "hidden",
                       }}
+                      exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="mt-2"
                     >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {getSuggestions().map((suggestion, index) => (
+                          <motion.button
+                            key={index}
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.2 }}
+                            className="text-left text-xs p-2 bg-white dark:bg-gray-700 rounded border border-indigo-200 dark:border-indigo-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-colors"
+                            onClick={() => {
+                              setInput(suggestion);
+                              inputRef.current?.focus();
+                            }}
+                          >
+                            {suggestion}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 

@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
-import { API_BASE_URL } from "../config.js";
 import {
-  FaFile,
-  FaFilePdf,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileAlt,
-  FaUpload,
-  FaTimes,
   FaDownload,
-  FaTrash,
+  FaFile,
+  FaFileAlt,
+  FaFilePdf,
+  FaFilePowerpoint,
+  FaFileWord,
   FaLink,
+  FaTimes,
+  FaTrash,
+  FaUpload,
 } from "react-icons/fa";
 
 const MaterialsPanel = ({ isOpen, onClose, subject }) => {
@@ -38,14 +37,11 @@ const MaterialsPanel = ({ isOpen, onClose, subject }) => {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${API_BASE_URL}/subjects/${subject.id}/materials/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`/subjects/${subject.id}/materials/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (Array.isArray(response.data)) {
         setMaterials(response.data);
@@ -110,16 +106,12 @@ const MaterialsPanel = ({ isOpen, onClose, subject }) => {
         formData.append("link", uploadForm.link);
       }
 
-      await axios.post(
-        `${API_BASE_URL}/subjects/${subject.id}/materials/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+      await axios.post(`/subjects/${subject.id}/materials/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
       // zresetowanie formularza
       setUploadForm({
@@ -144,14 +136,11 @@ const MaterialsPanel = ({ isOpen, onClose, subject }) => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `${API_BASE_URL}/subjects/${subject.id}/materials/${materialId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      await axios.delete(`/subjects/${subject.id}/materials/${materialId}/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       fetchMaterials(); // odświeżenie listy materiałów
     } catch (error) {
@@ -193,7 +182,7 @@ const MaterialsPanel = ({ isOpen, onClose, subject }) => {
 
       const token = localStorage.getItem("token");
 
-      const downloadUrl = `${API_BASE_URL}/subjects/${subject.id}/materials/${material.id}/download/`;
+      const downloadUrl = `/subjects/${subject.id}/materials/${material.id}/download/`;
 
       const response = await fetch(downloadUrl, {
         headers: {

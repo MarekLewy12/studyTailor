@@ -1,12 +1,10 @@
 import React, { forwardRef } from "react";
 import { motion } from "framer-motion";
 import {
-  FaRobot,
-  FaRegCalendarCheck,
-  FaBrain,
   FaBookOpen,
   FaLaptopCode,
-  FaUserGraduate,
+  FaRegCalendarCheck,
+  FaRobot,
 } from "react-icons/fa";
 
 const FeatureCard = ({ icon, title, description }) => {
