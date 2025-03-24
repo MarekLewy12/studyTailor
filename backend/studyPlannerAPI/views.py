@@ -421,9 +421,9 @@ def subject_assistant(request, subject_id):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
-def get_chat_history(request, subject_id):
+def chat_history(request, subject_id):
     """
     Pobieranie historii czatu dla konkretnego przedmiotu
     """
@@ -432,32 +432,38 @@ def get_chat_history(request, subject_id):
     except Subject.DoesNotExist:
         return Response({"error": "Przedmiot nie istnieje"}, status=404)
 
-    sessions = StudySession.objects.filter(
-        user=request.user,
-        subject=subject
-    ).order_by(
-        'created_at'
-    )
+    if request.method == 'GET':
+        sessions = StudySession.objects.filter(
+            user=request.user,
+            subject=subject
+        ).order_by(
+            'created_at'
+        )
 
-    messages = []
+        messages = []
 
-    if not sessions.exists():
-        messages.append({
-            "sender": "ai",
-            "text": f"Witaj! Jak mogę Ci pomóc w nauce przedmiotu {subject.name}?",
-            "timestamp": datetime.now().isoformat()
-        })
-    else:
-        for session in sessions:
-            messages.append({
-                "sender": "user",
-                "text": session.questions,
-                "timestamp": session.created_at.isoformat()
-            })
+        if not sessions.exists():
             messages.append({
                 "sender": "ai",
-                "text": session.answers,
-                "timestamp": session.created_at.isoformat()
+                "text": f"Witaj! Jak mogę Ci pomóc w nauce przedmiotu {subject.name}?",
+                "timestamp": datetime.now().isoformat()
             })
-
-    return Response(messages)
+        else:
+            for session in sessions:
+                messages.append({
+                    "sender": "user",
+                    "text": session.questions,
+                    "timestamp": session.created_at.isoformat()
+                })
+                messages.append({
+                    "sender": "ai",
+                    "text": session.answers,
+                    "timestamp": session.created_at.isoformat()
+                })
+        return Response(messages)
+    elif request.method == 'DELETE':
+        StudySession.objects.filter(
+            user=request.user,
+            subject=subject
+        ).delete()
+        return Response(status=204)
