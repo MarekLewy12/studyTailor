@@ -20,6 +20,7 @@ import {
   FaTrophy,
   FaCog,
 } from "react-icons/fa";
+import PageTitle from "../components/PageTitle.jsx";
 
 const DashboardPage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -191,14 +192,7 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen pt-20 px-4 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-6xl font-bold text-gray-800 dark:text-blue-300 mb-6 text-center mt-4"
-        >
-          Dashboard
-        </motion.h1>
-
+        <PageTitle title="Twój Dashboard" showUsername={true} />
         {/* Nawigacja zakładek */}
         <div className="mb-8 flex justify-center">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-md">

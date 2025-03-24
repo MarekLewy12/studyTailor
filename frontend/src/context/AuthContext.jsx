@@ -1,19 +1,26 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useNotification } from "./NotificationContext.jsx";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [username, setUsername] = useState("");
   const { addNotification } = useNotification();
 
   // Sprawdź token przy pierwszym ładowaniu
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
+      const storedUsername = localStorage.getItem("username");
+
       if (token) {
         setIsAuthenticated(true);
+        if (storedUsername) {
+          setUsername(storedUsername);
+        }
       }
       setIsLoading(false);
     };
@@ -29,8 +36,14 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("username");
     setIsAuthenticated(false);
     addNotification("Pomyślnie wylogowano!", "info");
+  };
+
+  const setUserInfo = (name) => {
+    setUsername(name);
+    localStorage.setItem("username", name);
   };
 
   if (isLoading) {
@@ -42,7 +55,9 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, username, login, logout, setUserInfo }}
+    >
       {children}
     </AuthContext.Provider>
   );

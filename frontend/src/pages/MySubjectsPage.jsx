@@ -20,6 +20,7 @@ import {
 import axios from "axios";
 import MaterialsPanel from "../components/MaterialsPanel.jsx";
 import AIChatPanel from "../components/AIChatPanel.jsx";
+import PageTitle from "../components/PageTitle.jsx";
 
 const MySubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -240,9 +241,7 @@ const MySubjectsPage = () => {
       />
 
       <div className="container mx-auto px-2 sm:px-4">
-        <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-center text-gray-800 dark:text-blue-300 mb-6 mt-4 px-2">
-          Moje Przedmioty
-        </h1>
+        <PageTitle title="Twoje przedmioty" showUsername={true} />
 
         {/* Zakładki nawigacyjne */}
         <div className="mb-8 flex flex-wrap justify-center">

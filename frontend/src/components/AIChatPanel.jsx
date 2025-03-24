@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import {
   FaChevronUp,
   FaPaperPlane,
@@ -8,6 +10,7 @@ import {
   FaRobot,
   FaSpinner,
   FaTimes,
+  FaTrash,
   FaUserGraduate,
 } from "react-icons/fa";
 
@@ -172,6 +175,16 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
     return basicSuggestions;
   };
 
+  const clearConversation = () => {
+    setMessages([
+      {
+        sender: "ai",
+        text: `Cześć! Jak mogę Ci pomóc z przedmiotem ${subject.name}?`,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -204,12 +217,22 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                   {subject ? `Asystent: ${subject.name}` : "Asystent AI"}
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300"
-              >
-                <FaTimes size={20} />
-              </button>
+              <div className="flex items-center">
+                <button
+                  onClick={clearConversation}
+                  className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300 mr-2"
+                  title="Wyczyść konwersację"
+                >
+                  <FaTrash size={18} />
+                </button>
+
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300"
+                >
+                  <FaTimes size={20} />
+                </button>
+              </div>
             </div>
 
             {/* TREŚĆ CZATU */}
@@ -253,7 +276,9 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                       }`}
                     >
                       <p className="whitespace-pre-wrap math-content">
-                        {message.text}
+                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                          {message.text}
+                        </ReactMarkdown>
                       </p>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
                         {formatMessageTime(message.timestamp)}

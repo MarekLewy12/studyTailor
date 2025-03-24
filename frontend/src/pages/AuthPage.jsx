@@ -18,7 +18,7 @@ const AuthPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login } = useContext(AuthContext);
+  const { login, setUserInfo } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const validateAlbumNumber = useCallback(async () => {
@@ -88,6 +88,7 @@ const AuthPage = () => {
       localStorage.setItem("refreshToken", response.data.refresh);
 
       if (isLoginView) {
+        setUserInfo(formData.username);
         login();
         navigate("/dashboard");
       } else {
