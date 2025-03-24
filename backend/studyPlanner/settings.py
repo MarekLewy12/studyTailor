@@ -240,3 +240,25 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Czas życia tokena dostępowego
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Czas życia tokena odświeżającego
+    'ROTATE_REFRESH_TOKENS': True,                   # Generowanie nowych refresh tokenów przy odświeżaniu
+    'BLACKLIST_AFTER_ROTATION': False,               # Nie dodawaj starego tokena do blacklisty
+    'UPDATE_LAST_LOGIN': False,                      # Nie aktualizuj pola last_login przy odświeżaniu tokena
+
+    'ALGORITHM': 'HS256',                            # Algorytm szyfrowania tokenów
+    'SIGNING_KEY': SECRET_KEY,                       # Klucz szyfrujący tokeny
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),                # Typ nagłówka autoryzacyjnego
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',        # Nazwa nagłówka autoryzacyjnego
+
+    'USER_ID_FIELD': 'id',                           # Pole identyfikujące użytkownika
+    'USER_ID_CLAIM': 'user_id',                      # Nazwa pola identyfikującego użytkownika
+}
