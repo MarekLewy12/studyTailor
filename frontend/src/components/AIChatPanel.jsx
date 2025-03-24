@@ -23,6 +23,46 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
   const inputRef = useRef(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const popupRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setShowDeleteConfirm(false);
+      }
+    };
+
+    if (showDeleteConfirm) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDeleteConfirm]);
+
+  const confirmAndDeleteConversation = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`/subject/${subject.id}/chat-history/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMessages([
+        {
+          sender: "ai",
+          text: `Cześć! Jak mogę Ci pomóc z przedmiotem ${subject.name}?`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Błąd podczas usuwania konwersacji:", error);
+      setError("Nie udało się usunąć historii czatu.");
+    }
+  };
 
   // Przewijanie czatu do najnowszej wiadomości
   const scrollToBottom = () => {
@@ -190,6 +230,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
       {isOpen && (
         <>
           <motion.div
+            ref={popupRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
@@ -218,14 +259,6 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                 </h2>
               </div>
               <div className="flex items-center">
-                <button
-                  onClick={clearConversation}
-                  className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300 mr-2"
-                  title="Wyczyść konwersację"
-                >
-                  <FaTrash size={18} />
-                </button>
-
                 <button
                   onClick={onClose}
                   className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300"
@@ -322,6 +355,51 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
 
               {/* Element do przewijania na koniec czatu */}
               <div ref={messagesEndRef} />
+            </div>
+
+            <div className="flex justify-end mr-4 mb-4">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm((prev) => !prev)}
+                  className="flex items-center px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-700/50 text-red-700 dark:text-red-300 rounded-md text-sm font-medium transition"
+                  title="Usuń konwersację"
+                >
+                  <FaTrash className="mr-1" />
+                  Usuń
+                </button>
+
+                <AnimatePresence>
+                  {showDeleteConfirm && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="absolute bottom-full mb-2 right-0 z-50 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg p-4 w-64"
+                    >
+                      <p className="text-sm text-gray-800 dark:text-gray-100 mb-3">
+                        Czy na pewno chcesz usunąć konwersację? Tej operacji nie
+                        da się cofnąć.
+                      </p>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                        >
+                          Anuluj
+                        </button>
+                        <button
+                          onClick={confirmAndDeleteConversation}
+                          className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition"
+                        >
+                          Usuń
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* SUGESTIE PYTAŃ */}

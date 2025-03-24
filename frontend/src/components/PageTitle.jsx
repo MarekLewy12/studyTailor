@@ -6,7 +6,13 @@ const PageTitle = ({ title, showUsername = true }) => {
   const { username } = useContext(AuthContext);
 
   const displayTitle =
-    showUsername && username ? `${title}, ${username}` : title;
+    showUsername && username ? (
+      <>
+        {title}, <span className="text-blue-500">{username}</span>
+      </>
+    ) : (
+      title
+    );
 
   return (
     <motion.h1
