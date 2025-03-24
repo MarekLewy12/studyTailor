@@ -185,6 +185,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Konfiguracja CORS
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'Authorization']
 
 # Zezwól na wszystkie żądania z innych domen
 # TODO zmienić to w przyszłości!
