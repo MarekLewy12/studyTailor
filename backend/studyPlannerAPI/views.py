@@ -484,8 +484,8 @@ def get_all_materials(request):
         'data': serializer.data,
         'stats': {
             'total_count': materials.count(),
-            'total_count_files': materials.filter(file__isnull=False).count(),
-            'total_count_links': materials.filter(link__isnull=False).count(),
+            'total_count_files': materials.filter(file__isnull=False).exclude(file='').count(),
+            'total_count_links': materials.filter(link__isnull=False).exclude(link='').count(),
             'total_size_in_bytes': total_size,
             'total_size_readable': get_readable_file_size(total_size)
         }

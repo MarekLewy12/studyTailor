@@ -1,4 +1,5 @@
-# studyPlannerAPI/tests.py
+from datetime import datetime
+
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient, APITestCase
@@ -6,6 +7,7 @@ from rest_framework import status
 from .models import CustomUser, Subject, Material
 import tempfile
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 
 from .models import Subject, Material
 
@@ -39,32 +41,32 @@ class GetAllMaterialsTestsCase(APITestCase):
             user=self.user1,
             name='Matematyka',
             lesson_form='wykład',
-            start_datetime='2025-04-01 10:00:00',
-            end_datetime='2025-04-01 12:00:00'
+            start_datetime=timezone.make_aware(datetime(2025, 4, 1, 10, 0, 0)),
+            end_datetime=timezone.make_aware(datetime(2025, 4, 1, 12, 0, 0))
         )
 
         self.subject2 = Subject.objects.create(
             user=self.user1,
             name='Fizyka',
             lesson_form='wykład',
-            start_datetime='2025-04-01 14:00:00',
-            end_datetime='2025-04-01 16:00:00'
+            start_datetime=timezone.make_aware(datetime(2025, 4, 1, 14, 0, 0)),
+            end_datetime=timezone.make_aware(datetime(2025, 4, 1, 16, 0, 0))
         )
 
         self.subject3 = Subject.objects.create(
             user=self.user2,
             name='Chemia',
             lesson_form='wykład',
-            start_datetime='2025-04-02 10:00:00',
-            end_datetime='2025-04-02 12:00:00'
+            start_datetime=timezone.make_aware(datetime(2025, 4, 1, 10, 0, 0)),
+            end_datetime=timezone.make_aware(datetime(2025, 4, 1, 12, 0, 0))
         )
 
         self.subject4 = Subject.objects.create(
             user=self.user2,
             name='Biologia',
             lesson_form='wykład',
-            start_datetime='2025-04-02 14:00:00',
-            end_datetime='2025-04-02 16:00:00'
+            start_datetime=timezone.make_aware(datetime(2025, 4, 1, 14, 0, 0)),
+            end_datetime=timezone.make_aware(datetime(2025, 4, 1, 16, 0, 0))
         )
 
         # materiały
