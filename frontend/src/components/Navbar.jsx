@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import { FaHome, FaList, FaMoon, FaRobot, FaSun } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { FaBook, FaHome, FaList, FaMoon, FaRobot, FaSun } from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
@@ -9,6 +9,7 @@ function Navbar() {
   const [isDark, setIsDark] = useState(false);
   const { isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (document.documentElement.classList.contains("dark")) {
@@ -55,11 +56,21 @@ function Navbar() {
       auth: true,
       icon: <FaRobot className="mr-2" />,
     },
+    {
+      name: "Twoje materiały",
+      dest: "/materials",
+      auth: true,
+      icon: <FaBook className="mr-2" />,
+    },
   ];
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
     <div className="fixed w-full bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-colors duration-300">
-      <div className="px-4">
+      <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Menu po lewej */}
           <nav className="hidden md:flex items-center space-x-6">
@@ -69,8 +80,17 @@ function Navbar() {
                 <Link
                   key={index}
                   to={item.dest}
-                  className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors duration-300"
+                  className={`flex items-center px-3 py-2 rounded-lg transition-all duration-300 ${
+                    isActive(item.dest)
+                      ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-medium"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-indigo-600 dark:hover:text-indigo-400"
+                  }`}
                 >
+                  <span
+                    className={`${isActive(item.dest) ? "text-indigo-600 dark:text-indigo-200" : "text-gray-500 dark:text-gray-400"}`}
+                  >
+                    {item.icon}
+                  </span>
                   {item.name}
                 </Link>
               ))}

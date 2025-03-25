@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import MySubjectsPage from "./pages/MySubjectsPage.jsx";
+import MaterialsPage from "./pages/MaterialsPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import { AuthContext, AuthProvider } from "./context/AuthContext.jsx";
@@ -57,6 +58,14 @@ const AppContent = () => {
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/materials"
+              element={
+                <ProtectedRoute>
+                  <MaterialsPage />
                 </ProtectedRoute>
               }
             />
