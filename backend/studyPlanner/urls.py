@@ -60,6 +60,7 @@ urlpatterns = [
     path('subject/<int:subject_id>/assistant/', subject_assistant, name='subject_assistant'),
     path('subject/<int:subject_id>/chat-history/', chat_history, name='get_chat_history'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('materials/get_all_materials/', views.get_all_materials, name='get_all_materials'),
 
 ]
 

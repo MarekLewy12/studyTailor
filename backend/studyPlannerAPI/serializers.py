@@ -25,6 +25,15 @@ class MaterialSerializer(serializers.ModelSerializer):
         model = Material
         fields = ['id', 'title', 'description', 'file', 'link', 'created_at']
 
+class MaterialSubjectSerializer(serializers.ModelSerializer):
+    subject_id = serializers.CharField(source='subject.id', read_only=True)
+    subject_name = serializers.CharField(source='subject.name', read_only=True)
+    lesson_form = serializers.CharField(source='subject.lesson_form', read_only=True)
+
+    class Meta:
+        model = Material
+        fields = ['id', 'title', 'description', 'file', 'link', 'created_at', 'subject_id', 'subject_name', 'lesson_form']
+
 
 class SubjectSerializer(serializers.ModelSerializer):
     materials_count = serializers.SerializerMethodField()

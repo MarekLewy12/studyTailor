@@ -1,3 +1,4 @@
+import math
 import os.path
 
 from drf_yasg.utils import swagger_auto_schema
@@ -19,7 +20,7 @@ import json
 from datetime import datetime, date, timedelta
 
 from .models import Subject, Material, StudySession
-from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer
+from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer, MaterialSubjectSerializer
 
 @api_view(['GET'])
 def root_view(request):
@@ -467,3 +468,40 @@ def chat_history(request, subject_id):
             subject=subject
         ).delete()
         return Response(status=204)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_materials(request):
+    """Pobieranie wszystkich materiałów użytkownika"""
+    try:
+        materials = Material.objects.filter(subject__user=request.user).select_related('subject')
+        serializer = MaterialSubjectSerializer(materials, many=True)
+
+        # wyliczenie łącznej wielkości materiałów użytkownika
+        total_size = sum([m.file.size for m in materials if m.file]) if materials else 0
+
+        return Response({
+        'data': serializer.data,
+        'stats': {
+            'total_count': materials.count(),
+            'total_count_files': materials.filter(file__isnull=False).count(),
+            'total_count_links': materials.filter(link__isnull=False).count(),
+            'total_size_in_bytes': total_size,
+            'total_size_readable': get_readable_file_size(total_size)
+        }
+        })
+
+    except Exception as e:
+        return Response({"Wystąpił błąd z pobieraniem materiałów": str(e)}, status=500)
+
+
+def get_readable_file_size(bytes_size):
+    if bytes_size == 0:
+        return "0B"
+    sizes = ["B", "KB", "MB", "GB", "TB"]
+
+    i = int(math.floor(math.log(bytes_size, 1024)))  # obliczamy, który rozmiar z listy sizes jest odpowiedni
+    p = math.pow(1024, i)  # ile bajtów ma 1 KB, 1 MB, itd.
+    s = round(bytes_size / p, 2)  # obliczamy wielkość w odpowiednich jednostkach
+
+    return f"{s} {sizes[i]}"
