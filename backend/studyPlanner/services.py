@@ -431,6 +431,7 @@ class DeepseekAIService:
         - Dla wzorów w osobnej linii użyj $$wzór$$
         Pisz zwięźle i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
         
+        Zliczaj czas który był potrzebny na uzyskanie odpowiedzi i wypisuj na końcu odpowiedzi.
         Odpowiadaj w języku polskim.
         """
 
