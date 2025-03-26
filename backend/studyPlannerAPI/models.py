@@ -82,6 +82,7 @@ class StudySession(models.Model):
     questions = models.TextField()
     answers = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    elapsed_time = models.FloatField(null=True, blank=True)
 
     message_type = models.CharField(max_length=20, default='question_answer')
 

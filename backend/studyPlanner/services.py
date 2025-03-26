@@ -383,14 +383,23 @@ class DeepseekAIService:
                 {"role": "user", "content": prompt},
             ]
 
+            from time import perf_counter
+
+            t1_start = perf_counter()
             response = self.client.chat.completions.create(
                 model="deepseek-chat",
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature
             )
+            t1_stop = perf_counter()
 
-            return response.choices[0].message.content
+            elapsed_time = t1_stop - t1_start
+
+            return {
+                "response": response.choices[0].message.content.strip(),
+                "elapsed_time": elapsed_time
+            }
 
         except Exception as e:
             print(f"Błąd podczas komunikacji z API Deepseek: {str(e)}")
@@ -431,7 +440,6 @@ class DeepseekAIService:
         - Dla wzorów w osobnej linii użyj $$wzór$$
         Pisz zwięźle i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
         
-        Zliczaj czas który był potrzebny Tobie do wygenerowania odpowiedzi i wypisuj na końcu odpowiedzi.
         Odpowiadaj w języku polskim.
         """
 

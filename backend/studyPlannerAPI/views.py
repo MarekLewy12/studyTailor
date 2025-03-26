@@ -398,25 +398,34 @@ def subject_assistant(request, subject_id):
 
         ai_service = DeepseekAIService(api_key)
 
-        answer = ai_service.generate_study_assistant_response(
+        result = ai_service.generate_study_assistant_response(
             subject_name=subject.name,
             question=question,
             subject_type=subject.lesson_form
         )
+
+        if isinstance(result, dict) and 'response' in result and 'elapsed_time' in result:
+            answer = result['response']
+            elapsed_time = result['elapsed_time']
+        else:
+            answer = result
+            elapsed_time = None
 
         # zapisanie do bazy
         study_session = StudySession.objects.create(
             user=request.user,
             subject=subject,
             questions=question,
-            answers=answer
+            answers=answer,
+            elapsed_time=elapsed_time
         )
 
         return Response({
             "subject": subject.name,
             "question": question,
             "answer": answer,
-            "timestamp": study_session.created_at.isoformat()
+            "timestamp": study_session.created_at.isoformat(),
+            "elapsed_time": elapsed_time
         })
 
     except Exception as e:
@@ -459,7 +468,8 @@ def chat_history(request, subject_id):
                 messages.append({
                     "sender": "ai",
                     "text": session.answers,
-                    "timestamp": session.created_at.isoformat()
+                    "timestamp": session.created_at.isoformat(),
+                    "elapsed_time": session.elapsed_time
                 })
         return Response(messages)
     elif request.method == 'DELETE':
