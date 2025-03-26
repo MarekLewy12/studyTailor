@@ -479,6 +479,7 @@ def chat_history(request, subject_id):
         ).delete()
         return Response(status=204)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_materials(request):

@@ -242,6 +242,20 @@ STORAGES = {
     },
 }
 
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
+        }
+    }
+}
+
+CONVERSATION_CONTEXT_TTL = 1800  # kontekst rozmowy jest ważny przez 30 minut
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Czas życia tokena dostępowego
