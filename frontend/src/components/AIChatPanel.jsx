@@ -169,6 +169,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
           sender: "ai",
           text: response.data.answer,
           timestamp: response.data.timestamp || new Date().toISOString(),
+          elapsed_time: response.data.elapsed_time,
         },
       ]);
     } catch (error) {
@@ -315,6 +316,11 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                       </p>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
                         {formatMessageTime(message.timestamp)}
+                        {message.sender === "ai" && message.elapsed_time && (
+                          <span className="ml-2">
+                            Czas odpowiedzi: {message.elapsed_time.toFixed(2)}s
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
