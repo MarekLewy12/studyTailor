@@ -404,7 +404,10 @@ class DeepseekAIService:
         except Exception as e:
             print(f"Błąd podczas komunikacji z API Deepseek: {str(e)}")
 
-            return "Przepraszam, wystąpił problem z połączeniem do asystenta AI. Spróbuj ponownie później."
+            return {
+                "response": "Przepraszam, wystąpił problem z połączeniem do asystenta AI. Spróbuj ponownie później.",
+                "elapsed_time": 0
+            }
 
     def generate_study_assistant_response(self, subject_name, question, subject_type=None):
         """
