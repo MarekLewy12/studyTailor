@@ -27,6 +27,52 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
 
   const popupRef = useRef(null);
 
+  // pasek postępu
+  const [responseProgress, setResponseProgress] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState(20);
+  const progressIntervalRef = useRef(null);
+  const responseTimes = useRef([]); // Tablica do przechowywania czasów odpowiedzi
+
+  const calculateAverageResponsetime = () => {
+    if (responseTimes.current.length === 0) return 20;
+
+    const recentTimes = responseTimes.current.slice(-5);
+    const sum = recentTimes.reduce((acc, time) => acc + time, 0);
+    const average = sum / recentTimes.length;
+
+    return average + 2;
+  };
+
+  const simulateProgress = (estimatedTimeInSec) => {
+    setResponseProgress(0);
+    setEstimatedTime(estimatedTimeInSec);
+
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    const totalSteps = 100;
+    const intervalDelay = (estimatedTimeInSec * 1000) / totalSteps; // opóźnienie w ms między aktualizacjami
+
+    let currentStep = 0;
+
+    progressIntervalRef.current = setInterval(() => {
+      currentStep++;
+
+      const progress = Math.min(
+        98,
+        Math.pow(currentStep / totalSteps, 0.7) * 98,
+      );
+
+      setResponseProgress(progress);
+
+      if (currentStep >= totalSteps) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    }, intervalDelay);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -149,6 +195,11 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
     setIsLoading(true);
     setError("");
 
+    const avgTime = calculateAverageResponsetime();
+    simulateProgress(avgTime);
+
+    const starttime = performance.now(); // rozpoczęcie pomiaru czasu
+
     try {
       const token = localStorage.getItem("token");
 
@@ -162,6 +213,14 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
         },
       );
 
+      clearInterval(progressIntervalRef.current);
+      setResponseProgress(100);
+
+      const endTime = performance.now(); // zakończenie pomiaru czasu
+      const actualResponseTime = (endTime - starttime) / 1000; // czas w sekundach
+
+      responseTimes.current.push(actualResponseTime); // dodanie czasu odpowiedzi do tablicy
+
       // Dodanie odpowiedzi AI do czatu
       setMessages((prev) => [
         ...prev,
@@ -173,6 +232,9 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
         },
       ]);
     } catch (error) {
+      clearInterval(progressIntervalRef.current);
+      setResponseProgress(0);
+
       console.error("Błąd podczas komunikacji z asystentem AI:", error);
       setError(
         "Nie udało się uzyskać odpowiedzi od asystenta. Spróbuj ponownie później.",
@@ -334,19 +396,29 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                       <FaRobot className="text-white text-sm" />
                     </div>
                     <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                      <div className="flex items-center space-x-2">
+                      {/*<div className="flex items-center space-x-2">*/}
+                      {/*  <div*/}
+                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
+                      {/*    style={{ animationDelay: "0ms" }}*/}
+                      {/*  ></div>*/}
+                      {/*  <div*/}
+                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
+                      {/*    style={{ animationDelay: "150ms" }}*/}
+                      {/*  ></div>*/}
+                      {/*  <div*/}
+                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
+                      {/*    style={{ animationDelay: "300ms" }}*/}
+                      {/*  ></div>*/}
+                      {/*</div>*/}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                         <div
-                          className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"
-                          style={{ animationDelay: "0ms" }}
+                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300 ease-out"
+                          style={{ width: `${responseProgress}%` }}
                         ></div>
-                        <div
-                          className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>Generowanie odpowiedzi...</span>
+                        <span>{responseProgress.toFixed(0)}%</span>
                       </div>
                     </div>
                   </div>
