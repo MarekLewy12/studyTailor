@@ -360,7 +360,7 @@ class DeepseekAIService:
             base_url="https://api.deepseek.com/",
         )
 
-    def generate_response(self, prompt, system_prompt=None, temperature=0.7, max_tokens=2048):
+    def generate_response(self, prompt, system_prompt=None, conversation_history=None, temperature=0.7, max_tokens=2048):
         """
         Generuje odpowiedź od modelu Deepseek
 
@@ -378,10 +378,15 @@ class DeepseekAIService:
             system_prompt = "Jesteś pomocnym asystentem nauki, który udziela rzeczowych i dokładnych odpowiedzi."
 
         try:
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ]
+            # instrukcja systemowa
+            messages = [{"role": "system", "content": system_prompt}]
+
+            # historia konwersacji
+            if conversation_history and isinstance(conversation_history, list):
+                messages.extend(conversation_history)
+
+            # pytanie użytkownika
+            messages.append({"role": "user", "content": prompt})
 
             from time import perf_counter
 
@@ -409,7 +414,7 @@ class DeepseekAIService:
                 "elapsed_time": 0
             }
 
-    def generate_study_assistant_response(self, subject_name, question, subject_type=None):
+    def generate_study_assistant_response(self, subject_name, question, subject_type=None, conversation_history=None):
         """
         Generuje odpowiedź od modelu Deepseek dla asystenta nauki
 
@@ -417,6 +422,7 @@ class DeepseekAIService:
             subject_name (str): Nazwa przedmiotu
             question (str): Zadane pytanie
             subject_type (str, optional): Typ przedmiotu (np. "wykład", "laboratorium")
+            conversation_history (list, optional): Historia konwersacji
 
         Returns:
             str: Odpowiedź asystenta nauki
@@ -448,4 +454,4 @@ class DeepseekAIService:
 
         prompt = f"Jako student uczący się {subject_context}, mam następujące pytanie: {question}"
 
-        return self.generate_response(prompt, system_prompt=system_prompt)
+        return self.generate_response(prompt, system_prompt=system_prompt, conversation_history=conversation_history)

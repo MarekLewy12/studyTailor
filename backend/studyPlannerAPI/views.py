@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from studyPlannerAPI.models import ModelRequest, CustomUser
 from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
+from studyPlannerAPI.conversation_context import ConversationContext
 
 from studyPlanner.services import StudyPlanner, DeepseekAIService
 
@@ -398,10 +399,16 @@ def subject_assistant(request, subject_id):
 
         ai_service = DeepseekAIService(api_key)
 
+        conversation_history = ConversationContext.get_conversation_history(
+            user_id=request.user.id,
+            subject_id=subject.id,
+        )
+
         result = ai_service.generate_study_assistant_response(
             subject_name=subject.name,
             question=question,
-            subject_type=subject.lesson_form
+            subject_type=subject.lesson_form,
+            conversation_history=conversation_history
         )
 
         if isinstance(result, dict) and 'response' in result and 'elapsed_time' in result:
@@ -418,6 +425,14 @@ def subject_assistant(request, subject_id):
             questions=question,
             answers=answer,
             elapsed_time=elapsed_time
+        )
+
+        # dodanie do historii konwersacji
+        ConversationContext.add_to_conversation_history(
+            user_id=request.user.id,
+            subject_id=subject.id,
+            question=question,
+            answer=answer
         )
 
         return Response({
@@ -516,3 +531,27 @@ def get_readable_file_size(bytes_size):
     s = round(bytes_size / p, 2)  # obliczamy wielkość w odpowiednich jednostkach
 
     return f"{s} {sizes[i]}"
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def clear_chat_context(request, subject_id):
+    """Czyszczenie kontekstu konwersacji"""
+    try:
+        subject = Subject.objects.get(pk=subject_id, user=request.user)
+
+        ConversationContext.clear_conversation_history(
+            user_id=request.user.id,
+            subject_id=subject.id
+        )
+
+        return Response({"message": "Kontekst konwersacji został wyczyszczony"}, status=status.HTTP_200_OK)
+
+    except Subject.DoesNotExist:
+        return Response({"error": "Przedmiot nie istnieje"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
