@@ -147,14 +147,35 @@ def get_subjects(request):
         force_refresh = request.query_params.get('refresh', 'false').lower() == 'true'
 
         has_subjects = Subject.objects.filter(user=user).exists()
-        last_update = user.profile.last_schedule_update if hasattr(user, 'profile') else None
 
-        needs_update = (
-                force_refresh or
-                not has_subjects or
-                not last_update or
-                datetime.now() - last_update > timedelta(days=1)
-        )
+        last_update = None
+
+        try:
+            if hasattr(user, 'profile') and user.profile.last_schedule_update:
+                last_update = user.profile.last_schedule_update
+                if not isinstance(last_update, datetime):
+                    try:
+                        # Próba konwersji z ISO formatu jeśli to string
+                        if isinstance(last_update, str):
+                            last_update = datetime.fromisoformat(last_update)
+                        else:
+                            last_update = None
+                    except ValueError:
+                        last_update = None
+        except Exception as e:
+            last_update = None
+            print(f"Błąd podczas próby pobrania last_update: {e}")
+
+        try:
+            needs_update = (
+                    force_refresh or
+                    not has_subjects or
+                    not last_update or
+                    (datetime.now() - last_update > timedelta(days=1))
+            )
+        except Exception as e:
+            needs_update = True
+            print(f"Błąd podczas porównywania dat: {e}")
 
         if needs_update:
             try:
@@ -184,6 +205,7 @@ def get_subjects(request):
                             id__in=preserved_ids
                         ).delete()
 
+                # Bezpieczna aktualizacja last_update
                 if hasattr(user, 'profile'):
                     user.profile.last_schedule_update = datetime.now()
                     user.profile.save()
@@ -194,13 +216,31 @@ def get_subjects(request):
         subjects = Subject.objects.filter(user=user).order_by('start_datetime')
         serializer = SubjectSerializer(subjects, many=True)
 
+        # Bezpieczna serializacja last_update
+        last_update_iso = None
+        if last_update:
+            try:
+                if hasattr(last_update, 'isoformat'):
+                    last_update_iso = last_update.isoformat()
+                elif isinstance(last_update, str):
+                    last_update_iso = last_update
+                else:
+                    last_update_iso = str(last_update)
+            except Exception:
+                last_update_iso = datetime.now().isoformat()
+        else:
+            last_update_iso = datetime.now().isoformat()
+
         return Response({
             'data': serializer.data,
-            'last_update': last_update.isoformat() if last_update else datetime.now().isoformat(),
+            'last_update': last_update_iso,
             'refreshed': needs_update,
             'empty_response': len(subjects) == 0
         })
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Krytyczny błąd w get_subjects: {e}\n{error_details}")
         return Response({"error": str(e)}, status=500)
 
 
