@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, ModelRequest, Subject, Material, StudySession, Profile
+from .models import CustomUser, ModelRequest, Subject, Material, StudySession
 
 from .models import ModelRequest
 admin.site.register(ModelRequest)
@@ -32,5 +32,4 @@ class SubjectAdmin(admin.ModelAdmin):
 
 admin.site.register(Material)
 admin.site.register(StudySession)
-admin.site.register(Profile)
 
