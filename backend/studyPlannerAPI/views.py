@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from studyPlannerAPI.models import ModelRequest, CustomUser
+from studyPlannerAPI.models import ModelRequest, CustomUser, Profile
 from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
 from studyPlannerAPI.conversation_context import ConversationContext
 
@@ -18,7 +18,8 @@ from studyPlanner.services import StudyPlanner, DeepseekAIService
 from django.conf import settings
 from django.http import HttpResponse
 import json
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
+import traceback
 
 from .models import Subject, Material, StudySession
 from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer, MaterialSubjectSerializer
@@ -142,28 +143,35 @@ def login_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_subjects(request):
+    current_time = datetime.now(timezone.utc) if settings.USE_TZ else datetime.now()
     try:
         user = request.user
         force_refresh = request.query_params.get('refresh', 'false').lower() == 'true'
 
+        profile, profile_created = Profile.objects.get_or_create(user=user)
+        last_schedule_update_val = profile.last_schedule_update
+
         has_subjects = Subject.objects.filter(user=user).exists()
-        last_update = user.profile.last_schedule_update if hasattr(user, 'profile') else None
 
         needs_update = (
                 force_refresh or
-                not has_subjects or
-                not last_update or
-                datetime.now() - last_update > timedelta(days=1)
+                not has_subjects or  # Jeśli nie ma żadnych przedmiotów
+                not last_schedule_update_val or  # Jeśli data ostatniej aktualizacji nie istnieje
+                # Jeśli data istnieje i jest starsza niż 1 dzień
+                (last_schedule_update_val and current_time - last_schedule_update_val > timedelta(days=1))
         )
 
         if needs_update:
+            print(
+                f"User {user.id}: Aktualizacja planu wymagana (force_refresh={force_refresh}, has_subjects={has_subjects}, last_update_exists={bool(last_schedule_update_val)})")
             try:
                 planner = StudyPlanner()
                 schedule_data = planner.get_schedule(user.album_number)
+                print(f"User {user.id}: Pobrany plan zawiera {len(schedule_data) if schedule_data else 0} pozycji.")
+
+                preserved_ids = []
 
                 if schedule_data:
-                    preserved_ids = []
-
                     for item in schedule_data:
                         subject, created = Subject.objects.update_or_create(
                             user=user,
@@ -171,37 +179,69 @@ def get_subjects(request):
                             lesson_form=item['lesson_form'],
                             start_datetime=item['start_datetime'],
                             defaults={
-                                'end_datetime': item['end_datetime']
+                                'end_datetime': item['end_datetime'],
+                                'is_mastered': False
                             }
                         )
                         preserved_ids.append(subject.id)
 
                     if preserved_ids:
-                        Subject.objects.filter(
-                            user=user,
-                            is_mastered=False
-                        ).exclude(
-                            id__in=preserved_ids
-                        ).delete()
+                        if created:
+                            print(f"User {user.id}: Utworzono przedmiot '{subject.name}' ({subject.id})")
+                        else:
+                            print(f"User {user.id}: Zaktualizowano przedmiot '{subject.name}' ({subject.id})")
 
-                if hasattr(user, 'profile'):
-                    user.profile.last_schedule_update = datetime.now()
-                    user.profile.save()
-                    last_update = user.profile.last_schedule_update
+                    deleted_count, _ = Subject.objects.filter(
+                        user=user,
+                        is_mastered=False
+                    ).exclude(
+                        id__in=preserved_ids
+                    ).delete()
+                    if deleted_count > 0:
+                        print(f"User {user.id}: Usunięto {deleted_count} starych, nieopanowanych przedmiotów.")
+
+                else:
+                    print(f"User {user.id}: API zwróciło pusty plan. Usuwanie nieopanowanych przedmiotów.")
+                    deleted_count, _ = Subject.objects.filter(user=user, is_mastered=False).delete()
+                    if deleted_count > 0:
+                        print(
+                            f"User {user.id}: Usunięto {deleted_count} nieopanowanych przedmiotów z powodu pustego planu.")
+
+                profile.last_schedule_update = current_time
+                profile.save()
+                last_schedule_update_val = profile.last_schedule_update
+                print(f"User {user.id}: Zaktualizowano profil użytkownika. Ostatnia aktualizacja: {last_schedule_update_val}")
+
+            except ConnectionError as e:
+                print(f"Błąd połączenia podczas pobierania planu dla użytkownika {user.id}: {e}")
+                pass
             except Exception as e:
-                print(f"Błąd podczas pobierania planu zajęć: {e}")
+                print(f"Błąd podczas pobierania/przetwarzania planu dla użytkownika {user.id}: {e}")
+                traceback.print_exc()  # pełny stack trace błędu
+                pass
 
-        subjects = Subject.objects.filter(user=user).order_by('start_datetime')
-        serializer = SubjectSerializer(subjects, many=True)
+                # Pobierz aktualną listę przedmiotów użytkownika
+                subjects = Subject.objects.filter(user=user).order_by('start_datetime')
+                serializer = SubjectSerializer(subjects, many=True)
+                print(
+                    f"User {user.id}: Zwracanie {subjects.count()} przedmiotów. Refreshed={needs_update}. Last Update={last_schedule_update_val}")
 
         return Response({
             'data': serializer.data,
-            'last_update': last_update.isoformat() if last_update else datetime.now().isoformat(),
-            'refreshed': needs_update,
-            'empty_response': len(subjects) == 0
+            'last_update': last_schedule_update_val.isoformat() if last_schedule_update_val else current_time.isoformat(),
+            'refreshed': needs_update,  # Informacja dla frontendu, czy dane zostały odświeżone
+            'empty_response': not subjects.exists()  # Czy lista przedmiotów jest pusta
         })
+
+    except Profile.DoesNotExist:
+        print(f"Krytyczny błąd: Nie można znaleźć ani utworzyć profilu dla użytkownika {request.user.id}")
+        return Response({"error": "Profil użytkownika nie został znaleziony ani utworzony."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        print(f"Nieobsługiwany wyjątek w get_subjects dla użytkownika {request.user.id}: {e}")
+        traceback.print_exc()
+        return Response({"error": "Wystąpił nieoczekiwany błąd serwera."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['PUT'])
