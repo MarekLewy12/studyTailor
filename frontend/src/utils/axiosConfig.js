@@ -68,18 +68,45 @@ const processQueue = (error, token = null) => {
 };
 
 // interceptor
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+axios.interceptors.request.use(async (config) => {
+  // sprawdzamy czy żądanie dotyczy odświeżania tokenu - uniknięcie nieskończonej pętli
+  if (config.url?.includes("/token/refresh")) {
     return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
+  }
+  const token = localStorage.getItem("token");
+
+  if (token && isTokenExpiringSoon(token)) {
+    // jeżeli token istnieje i niedługo wygasa
+    if (isRefreshing) {
+      // jeżeli już trwa odświeżanie tokenu -> dodaj do kolejki
+      try {
+        const newToken = await new Promise((resolve, reject) => {
+          const promiseCallbacks = { resolve, reject };
+          failedRequestsQueue.push(promiseCallbacks);
+        });
+        config.headers.Authorization = `Bearer ${newToken}`;
+        return config;
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    } else {
+      // jeżeli nie trwa już odświeżanie tokenu -> rozpocznij odświeżanie
+      isRefreshing = true;
+
+      try {
+        const newToken = await refreshAuthToken();
+        processQueue(null, newToken); // Rozwiąż wszystkie obietnice w kolejce
+        // Ustaw nowy token w nagłówkach
+        config.headers.Authorization = `Bearer ${newToken}`;
+        return config; // Zwróć skonfigurowane żądanie
+      } catch (error) {
+        return Promise.reject(error);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+  }
+});
 
 // interceptor do odświeżania tokena
 axios.interceptors.response.use(
