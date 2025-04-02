@@ -21,6 +21,7 @@ const isTokenExpiringSoon = (token, thresholdSeconds = 60) => {
     if (timeUntilExpiration < thresholdSeconds * 1000) {
       return true; // Token wygasa w ciągu 60 sekund
     }
+    return false; // Token nie wygasa w ciągu 60 sekund
   } catch (error) {
     console.error("Błąd dekodowania tokenu:", error);
     return true; // Jeśli wystąpił błąd, traktujemy token jako wygasły
@@ -105,7 +106,12 @@ axios.interceptors.request.use(async (config) => {
         isRefreshing = false;
       }
     }
+  } else {
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
+  return config; // Zwróć skonfigurowane żądanie
 });
 
 // interceptor do odświeżania tokena
@@ -114,63 +120,48 @@ axios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Obsługuj tylko błędy 401
     if (
+      error.response &&
       error.response.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes("/token/refresh")
     ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedRequestsQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return axios(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
-      // odświeżanie tokenu
       originalRequest._retry = true;
-      isRefreshing = true;
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
 
         if (!refreshToken) {
-          window.location.href = "/auth";
-          return Promise.reject(error);
+          throw new Error("Brak tokenu odświeżającego");
         }
 
+        // Próba odświeżenia tokenu
         const response = await axios.post(
           "/token/refresh/",
           { refresh: refreshToken },
           { headers: { Authorization: "" } },
         );
 
-        const { access } = response.data;
+        const newToken = response.data.access;
+        localStorage.setItem("token", newToken);
 
-        localStorage.setItem("token", access);
-        originalRequest.headers.Authorization = `Bearer ${access}`;
+        // Ustaw nowy token w oryginalnym żądaniu
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
-        processQueue(null, access);
-
+        // Ponów oryginalne żądanie
         return axios(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
-
+        // Wyloguj użytkownika w przypadku problemu z odświeżeniem tokenu
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
-
         window.location.href = "/auth";
-
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
-    return Promise.reject(error); // Odrzucenie innych błędów niż 401
+
+    // Dla wszystkich innych błędów -> odrzuć obietnicę
+    return Promise.reject(error);
   },
 );
 

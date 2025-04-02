@@ -213,24 +213,58 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
         },
       );
 
-      clearInterval(progressIntervalRef.current);
-      setResponseProgress(100);
+      // Pobranie id zadania
+      const taskId = response.data.task_id;
+
+      const checkTaskStatus = async () => {
+        try {
+          const statusResponse = await axios.get(`/task/${taskId}/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (statusResponse.data.status === "completed") {
+            clearInterval(progressIntervalRef.current);
+            setResponseProgress(100);
+
+            const result = statusResponse.data.result;
+
+            // Dodanie odpowiedzi AI do czatu
+            setMessages((prev) => [
+              ...prev,
+              {
+                sender: "ai",
+                text: result.answer,
+                timestamp: result.timestamp || new Date().toISOString(),
+                elapsed_time: result.elapsed_time,
+              },
+            ]);
+            setIsLoading(false);
+          } else if (statusResponse.data.status === "failed") {
+            clearInterval(progressIntervalRef.current);
+            setResponseProgress(0);
+            setIsLoading(false);
+            setError("Wystąpił błąd podczas przetwarzania zapytania.");
+          } else {
+            // Kontynuuj sprawdzanie statusu co 2 sekundy
+            setTimeout(checkTaskStatus, 2000);
+          }
+        } catch (error) {
+          clearInterval(progressIntervalRef.current);
+          setResponseProgress(0);
+          setIsLoading(false);
+          setError("Wystąpił błąd podczas sprawdzania statusu zadania.");
+          console.error("Błąd podczas sprawdzania statusu zadania:", error);
+        }
+      };
+
+      checkTaskStatus();
 
       const endTime = performance.now(); // zakończenie pomiaru czasu
       const actualResponseTime = (endTime - starttime) / 1000; // czas w sekundach
 
       responseTimes.current.push(actualResponseTime); // dodanie czasu odpowiedzi do tablicy
-
-      // Dodanie odpowiedzi AI do czatu
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "ai",
-          text: response.data.answer,
-          timestamp: response.data.timestamp || new Date().toISOString(),
-          elapsed_time: response.data.elapsed_time,
-        },
-      ]);
     } catch (error) {
       clearInterval(progressIntervalRef.current);
       setResponseProgress(0);
@@ -239,8 +273,6 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
       setError(
         "Nie udało się uzyskać odpowiedzi od asystenta. Spróbuj ponownie później.",
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -395,31 +427,12 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                     <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-gradient-to-br from-purple-500 to-indigo-600">
                       <FaRobot className="text-white text-sm" />
                     </div>
-                    <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                      {/*<div className="flex items-center space-x-2">*/}
-                      {/*  <div*/}
-                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
-                      {/*    style={{ animationDelay: "0ms" }}*/}
-                      {/*  ></div>*/}
-                      {/*  <div*/}
-                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
-                      {/*    style={{ animationDelay: "150ms" }}*/}
-                      {/*  ></div>*/}
-                      {/*  <div*/}
-                      {/*    className="w-2 h-2 rounded-full bg-purple-600 animate-bounce"*/}
-                      {/*    style={{ animationDelay: "300ms" }}*/}
-                      {/*  ></div>*/}
-                      {/*</div>*/}
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300 ease-out"
-                          style={{ width: `${responseProgress}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <span>Generowanie odpowiedzi...</span>
-                        <span>{responseProgress.toFixed(0)}%</span>
-                      </div>
+                    <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center space-x-2">
+                      {/* Komunikat o ładowaniu */}
+                      <FaSpinner className="animate-spin text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        Asystent przetwarza Twoje zapytanie...
+                      </span>
                     </div>
                   </div>
                 </div>
