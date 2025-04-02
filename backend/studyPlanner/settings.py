@@ -35,9 +35,8 @@ ALLOWED_HOSTS = [
     'studytailor.onrender.com',
     'onrender.com',
     'studytailor-ff458288cb1c.herokuapp.com',
-    '.herokuapp.com'
+    '.herokuapp.com',
 ]
-
 
 # Application definition
 
@@ -276,3 +275,13 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',                           # Pole identyfikujące użytkownika
     'USER_ID_CLAIM': 'user_id',                      # Nazwa pola identyfikującego użytkownika
 }
+
+# CELERY
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+INSTALLED_APPS += ['django_celery_results']

@@ -23,6 +23,9 @@ from datetime import datetime, date, timedelta
 from .models import Subject, Material, StudySession
 from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer, MaterialSubjectSerializer
 
+from .tasks import process_ai_assistant_request
+from celery.result import AsyncResult
+
 @api_view(['GET'])
 def root_view(request):
     """
@@ -432,59 +435,40 @@ def subject_assistant(request, subject_id):
     if not question:
         return Response({"error": "Brak pytania"}, status=400)
 
-    try:
-        api_key = os.getenv('DEEPSEEK_API_KEY')
-        if not api_key:
-            return Response({"error": "Brak klucza API DeepSeek"}, status=500)
+    task = process_ai_assistant_request.delay(
+        subject_id=subject.id,
+        user_id=request.user.id,
+        question=question
+    )
 
-        ai_service = DeepseekAIService(api_key)
+    return Response({
+        "task_id": task.id,
+        "status": "processing",
+        "message": "Twoje pytanie zostało przekazane do przetworzenia. Oczekuj na odpowiedź."
+    })
 
-        conversation_history = ConversationContext.get_conversation_history(
-            user_id=request.user.id,
-            subject_id=subject.id,
-        )
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_assistant_task(request, task_id):
+    """Sprawdzenie statusu zadania asystenta AI"""
+    task_result = AsyncResult(task_id)
 
-        result = ai_service.generate_study_assistant_response(
-            subject_name=subject.name,
-            question=question,
-            subject_type=subject.lesson_form,
-            conversation_history=conversation_history
-        )
-
-        if isinstance(result, dict) and 'response' in result and 'elapsed_time' in result:
-            answer = result['response']
-            elapsed_time = result['elapsed_time']
+    if task_result.ready():
+        if task_result.successful():
+            return Response({
+                "status": "completed",
+                "result": task_result.result
+            })
         else:
-            answer = result
-            elapsed_time = None
-
-        # zapisanie do bazy
-        study_session = StudySession.objects.create(
-            user=request.user,
-            subject=subject,
-            questions=question,
-            answers=answer,
-            elapsed_time=elapsed_time
-        )
-
-        # dodanie do historii konwersacji
-        ConversationContext.add_to_conversation_history(
-            user_id=request.user.id,
-            subject_id=subject.id,
-            question=question,
-            answer=answer
-        )
-
+            return Response({
+                "status": "failed",
+                "error": str(task_result.result)
+            }, status=500)
+    else:
         return Response({
-            "subject": subject.name,
-            "question": question,
-            "answer": answer,
-            "timestamp": study_session.created_at.isoformat(),
-            "elapsed_time": elapsed_time
+            "status": "processing",
+            "message": "Zadanie jest w trakcie przetwarzania. Proszę czekać."
         })
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=500)
 
 @api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
