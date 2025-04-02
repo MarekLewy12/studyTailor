@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import ssl
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -279,10 +279,10 @@ INSTALLED_APPS += ['django_celery_results']
 
 if REDIS_USE_SSL:
     CELERY_BROKER_USE_SSL = {
-        'ssl_cert_reqs': None,
+        'ssl_cert_reqs': ssl.CERT_NONE,
     }
     CELERY_REDIS_BACKEND_USE_SSL = {
-        'ssl_cert_reqs': None,
+        'ssl_cert_reqs': ssl.CERT_NONE,
     }
 
     CACHES = {
@@ -291,7 +291,7 @@ if REDIS_USE_SSL:
             "LOCATION": REDIS_URL,
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
+                "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_NONE},
             }
         }
     }

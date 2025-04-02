@@ -19,8 +19,9 @@ from django.conf import settings
 from django.http import HttpResponse
 import json
 from datetime import datetime, date, timedelta
+from django.utils import timezone
 
-from .models import Subject, Material, StudySession
+from .models import Subject, Material, StudySession, Profile
 from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer, MaterialSubjectSerializer
 
 from .tasks import process_ai_assistant_request
@@ -152,10 +153,12 @@ def get_subjects(request):
         has_subjects = Subject.objects.filter(user=user).exists()
 
         last_update = None
+        profile = None
 
         try:
+            profile = user.profile
             if hasattr(user, 'profile') and user.profile.last_schedule_update:
-                last_update = user.profile.last_schedule_update
+                last_update = profile.last_schedule_update
                 if not isinstance(last_update, datetime):
                     try:
                         # Próba konwersji z ISO formatu jeśli to string
@@ -165,23 +168,31 @@ def get_subjects(request):
                             last_update = None
                     except ValueError:
                         last_update = None
+
+        except CustomUser.profile.RelatedObjectDoesNotExist:
+            profile = None
+            print(f"Nie znaleziono profilu użytkownika: {user.username}")
         except Exception as e:
             last_update = None
             print(f"Błąd podczas próby pobrania last_update: {e}")
 
-        try:
-            needs_update = (
-                    force_refresh or
-                    not has_subjects or
-                    not last_update or
-                    (datetime.now() - last_update > timedelta(days=1))
-            )
-        except Exception as e:
+        needs_update = False  # Domyślnie nie aktualizuj
+        if last_update and isinstance(last_update, datetime):
+            try:
+                # Użyj timezone.now() do porównania
+                needs_update = (timezone.now() - last_update > timedelta(days=1))
+            except TypeError as e:
+                print(
+                    f"Błąd podczas porównywania dat: {e}. last_update={last_update}, typ={type(last_update)}")
+                needs_update = True
+        else:
             needs_update = True
-            print(f"Błąd podczas porównywania dat: {e}")
+
+        needs_update = force_refresh or not has_subjects or needs_update
 
         if needs_update:
             try:
+                print(f"Aktualizacja planu zajęć dla użytkownika: {user.username}...")
                 planner = StudyPlanner()
                 schedule_data = planner.get_schedule(user.album_number)
 
@@ -208,13 +219,19 @@ def get_subjects(request):
                             id__in=preserved_ids
                         ).delete()
 
-                # Bezpieczna aktualizacja last_update
-                if hasattr(user, 'profile'):
-                    user.profile.last_schedule_update = datetime.now()
-                    user.profile.save()
-                    last_update = user.profile.last_schedule_update
+                if profile is None:
+                    profile, created = Profile.objects.get_or_create(user=user)
+                    print(f"Utworzono profil dla użytkownika: {user.username}")
+
+                profile.last_schedule_update = timezone.now()
+                profile.save()
+                last_update = profile.last_schedule_update
+                print(f"Zaktualizowano profil użytkownika: {user.username}, last_update={last_update}")
+
             except Exception as e:
+                import traceback
                 print(f"Błąd podczas pobierania planu zajęć: {e}")
+                print(traceback.format_exc())
 
         subjects = Subject.objects.filter(user=user).order_by('start_datetime')
         serializer = SubjectSerializer(subjects, many=True)
@@ -230,9 +247,9 @@ def get_subjects(request):
                 else:
                     last_update_iso = str(last_update)
             except Exception:
-                last_update_iso = datetime.now().isoformat()
+                last_update_iso = timezone.now().isoformat()
         else:
-            last_update_iso = datetime.now().isoformat()
+            last_update_iso = timezone.now().isoformat()
 
         return Response({
             'data': serializer.data,
@@ -495,7 +512,7 @@ def chat_history(request, subject_id):
             messages.append({
                 "sender": "ai",
                 "text": f"Witaj! Jak mogę Ci pomóc w nauce przedmiotu {subject.name}?",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": timezone.now().isoformat()
             })
         else:
             for session in sessions:
