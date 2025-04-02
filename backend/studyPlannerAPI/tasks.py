@@ -24,17 +24,17 @@ def process_ai_assistant_request(self, subject_id, user_id, question):
         )
 
         result = ai_service.generate_study_assistant_response(
-            subject_name = subject.name,
-            question = question,
-            subject_type= subject.lesson_form,
-            conversation_history = conversation_history
+            subject_name=subject.name,
+            question=question,
+            subject_type=subject.lesson_form,
+            conversation_history=conversation_history
         )
 
         if isinstance(result, dict) and 'response' in result and 'elapsed_time' in result:
             response = result['response']
             elapsed_time = result['elapsed_time']
         else:
-            answer = result
+            response = result
             elapsed_time = None
 
         # Zapisanie sesji nauki
@@ -59,7 +59,7 @@ def process_ai_assistant_request(self, subject_id, user_id, question):
             "id": study_session.id,
             "subject": subject.name,
             "question": question,
-            "answer": answer,
+            "answer": response,
             "timestamp": study_session.created_at.isoformat(),
             "elapsed_time": elapsed_time,
         }

@@ -243,16 +243,7 @@ STORAGES = {
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
-        }
-    }
-}
+REDIS_USE_SSL = REDIS_URL.startswith('rediss://')
 
 CONVERSATION_CONTEXT_TTL = 1800  # kontekst rozmowy jest ważny przez 30 minut
 
@@ -285,3 +276,33 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 INSTALLED_APPS += ['django_celery_results']
+
+if REDIS_USE_SSL:
+    CELERY_BROKER_USE_SSL = {
+        'ssl_cert_reqs': None,
+    }
+    CELERY_REDIS_BACKEND_USE_SSL = {
+        'ssl_cert_reqs': None,
+    }
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
+            }
+        }
+    }
+
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
