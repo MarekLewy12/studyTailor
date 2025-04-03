@@ -4,9 +4,12 @@ import FeaturesSection from "../components/FeatureSection.jsx";
 import AIAssistantDemo from "../components/AIAssistantDemo.jsx";
 import FAQSection from "../components/FAQSection.jsx";
 import AboutProjectSection from "../components/AboutProjectSection.jsx";
+import AiToolsSection from "../components/AiToolsSection.jsx";
+import CallToAction from "../components/CallToAction.jsx";
 
 const HomePage = () => {
   const featuresRef = useRef(null);
+  const aiToolsRef = useRef(null);
 
   const scrollToFeatures = () => {
     if (featuresRef.current) {
@@ -28,19 +31,24 @@ const HomePage = () => {
       <div id="features" ref={featuresRef}>
         <FeaturesSection />
       </div>
+      {/* AI Tools */}
+      <AiToolsSection />
 
-      <div className="container mx-auto py-10 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* O projekcie */}
-          <AboutProjectSection />
+      {/*<div className="container mx-auto py-10 px-4">*/}
+      {/*  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">*/}
+      {/*    /!* O projekcie *!/*/}
+      {/*    <AboutProjectSection />*/}
 
-          {/* FAQ */}
-          <FAQSection />
-        </div>
-      </div>
+      {/*    /!* FAQ *!/*/}
+      {/*    <FAQSection />*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
-      {/* Demo AI Assistant */}
-      <AIAssistantDemo />
+      {/*/!* Demo AI Assistant *!/*/}
+      {/*<AIAssistantDemo />*/}
+
+      {/* Call to action */}
+      {/*<CallToAction />*/}
     </div>
   );
 };

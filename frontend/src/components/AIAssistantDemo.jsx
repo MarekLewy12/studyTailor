@@ -1,168 +1,114 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaBookOpen, FaCheck, FaLightbulb, FaRobot } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaRobot, FaUserGraduate } from "react-icons/fa";
 
-const AIAssistantDemo = () => {
+const AiAssistantDemo = () => {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <h2 className="text-7xl font-bold text-indigo-500">
-          Asystent AI do nauki
-        </h2>
-        <p className="text-gray-600 mt-2">
-          Zobacz, jak wygląda nauka z inteligentnym wsparciem
-        </p>
+    <section className="py-16">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+            Asystent AI w akcji
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Zobacz, jak nasz asystent odpowiada na pytania i pomaga w efektywnej
+            nauce
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+          className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
+        >
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white">
+            <div className="flex items-center">
+              <FaRobot className="mr-2" />
+              <h3 className="font-bold">Asystent Nauki</h3>
+            </div>
+          </div>
+          <div className="p-6 space-y-6">
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                <FaRobot className="text-white" />
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg max-w-[80%]">
+                <p className="text-gray-800 dark:text-gray-200">
+                  Witaj! Jestem asystentem StudyTailor. W czym mogę Ci pomóc?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4 justify-end">
+              <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg max-w-[80%]">
+                <p className="text-gray-800 dark:text-gray-200">
+                  Możesz wyjaśnić mi działanie protokołu DHCP?
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                <FaUserGraduate className="text-white" />
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                <FaRobot className="text-white" />
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg max-w-[80%]">
+                <p className="text-gray-800 dark:text-gray-200">
+                  <strong>DHCP (Dynamic Host Configuration Protocol)</strong> to
+                  protokół komunikacyjny umożliwiający automatyczne
+                  przydzielanie adresów IP urządzeniom w sieci. Działa w
+                  architekturze klient-serwer i składa się z czterech kluczowych
+                  etapów:
+                </p>
+                <ol className="mt-2 ml-5 list-decimal space-y-1 text-gray-700 dark:text-gray-300">
+                  <li>
+                    <strong>DHCP Discover</strong> - klient wysyła
+                    rozgłoszeniowy pakiet w poszukiwaniu serwera DHCP
+                  </li>
+                  <li>
+                    <strong>DHCP Offer</strong> - serwer odpowiada ofertą
+                    konfiguracji zawierającą adres IP
+                  </li>
+                  <li>
+                    <strong>DHCP Request</strong> - klient wybiera i potwierdza
+                    akceptację oferty
+                  </li>
+                  <li>
+                    <strong>DHCP Acknowledge</strong> - serwer zatwierdza
+                    przyznanie adresu i przesyła pełną konfigurację
+                  </li>
+                </ol>
+                <p className="mt-2 text-gray-800 dark:text-gray-200">
+                  Dzięki DHCP administratorzy mogą centralnie zarządzać
+                  adresacją IP, co eliminuje konflikty adresów i upraszcza
+                  konfigurację nowych urządzeń w sieci.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex justify-center">
+            <Link
+              to="/public-tools"
+              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Wypróbuj samodzielnie
+            </Link>
+          </div>
+        </motion.div>
       </div>
-      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Przykład przedmiotu z asystentem */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex-1 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow"
-          >
-            <div className="border-b border-gray-200 dark:border-gray-600 pb-4 mb-4">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                Sieci komputerowe
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Laboratorium, 14:15 - 15:45
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="bg-orange-500 text-white p-2 rounded-full">
-                  <FaRobot />
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-600 p-3 rounded-lg">
-                  <p className="text-gray-800 dark:text-gray-200">
-                    W czym mogę Ci dzisiaj pomóc przy sieciach komputerowych?
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 justify-end">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                  <p className="text-gray-800 dark:text-gray-200">
-                    Wytłumacz mi jak działa protokół DHCP?
-                  </p>
-                </div>
-                <div className="bg-blue-500 text-white p-2 rounded-full">
-                  <FaBookOpen />
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="bg-orange-500 text-white p-2 rounded-full">
-                  <FaRobot />
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-600 p-3 rounded-lg">
-                  <p className="text-gray-800 dark:text-gray-200">
-                    DHCP (Dynamic Host Configuration Protocol) to protokół
-                    umożliwiający automatyczną konfigurację urządzeń w sieci.
-                    Działa w czterech krokach:
-                  </p>
-                  <ol className="list-decimal list-inside mt-2 space-y-1 text-gray-700 dark:text-gray-300">
-                    <li>
-                      DHCP Discover - klient wysyła broadcast szukając serwera
-                      DHCP
-                    </li>
-                    <li>DHCP Offer - serwer odpowiada ofertą adresu IP</li>
-                    <li>DHCP Request - klient akceptuje ofertę</li>
-                    <li>
-                      DHCP Acknowledge - serwer potwierdza przyznanie adresu
-                    </li>
-                  </ol>
-                  <p className="mt-2 text-gray-800 dark:text-gray-200">
-                    Czy chciałbyś, żebym podał więcej szczegółów na temat
-                    któregoś z tych kroków?
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-between">
-              <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition duration-300">
-                <FaLightbulb />
-                <span>Podpowiedz mi</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300">
-                <FaCheck />
-                <span>Oznacz jako przyswojone</span>
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Drugi przykład */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            viewport={{ once: true }}
-            className="flex-1 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg shadow"
-          >
-            <div className="border-b border-gray-200 dark:border-gray-600 pb-4 mb-4">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                Sztuczna inteligencja
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Laboratorium, 10:15 - 11:45
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 mb-4 bg-green-100 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500">
-              <div className="flex items-center gap-2">
-                <FaCheck className="text-green-500" />
-                <span className="text-gray-800 dark:text-gray-200">
-                  Przyswojone: Sieci neuronowe
-                </span>
-              </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                21.02.2025
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 dark:text-gray-200">
-                Materiały do nauki:
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
-                  <span className="text-gray-800 dark:text-gray-200">
-                    Algorytmy uczenia maszynowego.pdf
-                  </span>
-                  <button className="text-blue-500 hover:text-blue-700">
-                    Pobierz
-                  </button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-600 rounded-lg">
-                  <span className="text-gray-800 dark:text-gray-200">
-                    Moje notatki z wykładu
-                  </span>
-                  <button className="text-blue-500 hover:text-blue-700">
-                    Otwórz
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-between">
-              <button className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-300">
-                <FaRobot />
-                <span>Ucz się z AI</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
-                <FaBookOpen />
-                <span>Dodaj materiały</span>
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 };
 
-export default AIAssistantDemo;
+export default AiAssistantDemo;
