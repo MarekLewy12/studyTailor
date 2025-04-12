@@ -7,7 +7,9 @@ const AiToolsSection = forwardRef((props, ref) => {
   return (
     <section
       ref={ref}
-      className="py-24 bg-gradient-to-br from-indigo-900 to-purple-900 text-white overflow-hidden relative"
+      className="py-24 relative overflow-hidden
+    bg-gradient-to-br from-indigo-50 to-violet-100 dark:from-indigo-950/70 dark:to-purple-950/70
+    dark:bg-opacity-80 backdrop-blur-sm text-gray-800 dark:text-white"
     >
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -17,13 +19,44 @@ const AiToolsSection = forwardRef((props, ref) => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gray-800 dark:text-white">
             Sztuczna Inteligencja dla{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-pink-300">
+            <motion.span
+              initial={{ color: "inherit" }}
+              whileInView={{
+                color: "transparent",
+                transition: { duration: 0.5 },
+              }}
+              viewport={{ once: true }}
+              className="relative inline-block bg-clip-text"
+            >
+              <motion.span
+                initial={{ backgroundImage: "none" }}
+                whileInView={{
+                  backgroundImage:
+                    "linear-gradient(to right, #4f46e5, #8b5cf6, #3b82f6)",
+                }}
+                transition={{ delay: 0.5, duration: 0.3 }}
+                viewport={{ once: true }}
+                className="absolute inset-0 bg-clip-text text-transparent"
+              >
+                Wszystkich
+              </motion.span>
               Wszystkich
-            </span>
+              <motion.span
+                className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-violet-500 to-blue-500"
+                initial={{ width: 0 }}
+                whileInView={{ width: "100%" }}
+                transition={{
+                  duration: 1.2,
+                  delay: 0.8,
+                  ease: "easeOut",
+                }}
+                viewport={{ once: true }}
+              />
+            </motion.span>
           </h2>
-          <p className="text-xl md:text-2xl text-indigo-100 max-w-4xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-indigo-100 max-w-4xl mx-auto">
             Dostęp do zaawansowanych narzędzi AI bez rejestracji i weryfikacji
             uczelni
           </p>
@@ -35,20 +68,23 @@ const AiToolsSection = forwardRef((props, ref) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             viewport={{ once: true }}
-            className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl border border-white/20 hover:bg-white/15 transition-colors duration-300"
+            className="bg-white dark:bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl
+            border border-indigo-100 dark:border-white/20
+          hover:bg-indigo-50 dark:hover:bg-white/15 transition-colors duration-300"
           >
             <div className="bg-gradient-to-br from-purple-500 to-indigo-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-lg">
               <FaRobot className="text-2xl" />
             </div>
             <h3 className="text-2xl font-bold mb-4">Asystent AI</h3>
-            <p className="text-indigo-100 mb-6">
+            <p className="text-gray-600 dark:text-indigo-100 mb-6">
               Zadawaj pytania na dowolny temat i otrzymuj natychmiastowe,
               inteligentne odpowiedzi od naszego zaawansowanego asystenta
               opartego na modelach językowych najnowszej generacji.
             </p>
             <Link
               to="/public-tools"
-              className="inline-flex items-center text-amber-300 hover:text-amber-100 transition-colors font-medium"
+              className="inline-flex items-center text-indigo-600 hover:text-indigo-800
+            dark:text-amber-300 dark:hover:text-amber-100 transition-colors font-medium"
             >
               Wypróbuj teraz <span className="ml-2">→</span>
             </Link>
@@ -59,17 +95,23 @@ const AiToolsSection = forwardRef((props, ref) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
-            className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl border border-white/20 hover:bg-white/15 transition-colors duration-300"
+            className="bg-white dark:bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl
+            border border-indigo-100 dark:border-white/20
+          hover:bg-indigo-50 dark:hover:bg-white/15 transition-colors duration-300"
           >
             <div className="bg-gradient-to-br from-amber-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-lg">
               <FaBrain className="text-2xl" />
             </div>
             <h3 className="text-2xl font-bold mb-4">Generacja Materiałów</h3>
-            <p className="text-indigo-100 mb-6">
+            <p className="text-gray-600 dark:text-indigo-100 mb-6">
+              {" "}
               Twórz spersonalizowane fiszki, zestawy pytań i notatki na
               podstawie dowolnego tematu.
             </p>
-            <span className="inline-flex items-center text-amber-300 opacity-75 font-medium">
+            <span
+              className="inline-flex items-center text-indigo-600 hover:text-indigo-800
+            dark:text-amber-300 dark:hover:text-amber-100 transition-colors font-medium"
+            >
               Dostępne wkrótce <span className="ml-2">→</span>
             </span>
           </motion.div>
@@ -79,18 +121,24 @@ const AiToolsSection = forwardRef((props, ref) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             viewport={{ once: true }}
-            className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl border border-white/20 hover:bg-white/15 transition-colors duration-300"
+            className="bg-white dark:bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl
+            border border-indigo-100 dark:border-white/20
+           hover:bg-indigo-50 dark:hover:bg-white/15 transition-colors duration-300"
           >
             <div className="bg-gradient-to-br from-blue-500 to-teal-500 w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-lg">
               <FaCalendarAlt className="text-2xl" />
             </div>
             <h3 className="text-2xl font-bold mb-4">Planer Nauki</h3>
-            <p className="text-indigo-100 mb-6">
+            <p className="text-gray-600 dark:text-indigo-100 mb-6">
+              {" "}
               Stwórz spersonalizowany harmonogram nauki dopasowany do Twoich
               potrzeb. Określ swoje cele, dostępny czas i preferencje, a
               algorytm zoptymalizuje plan dla maksymalnej efektywności.
             </p>
-            <span className="inline-flex items-center text-amber-300 opacity-75 font-medium">
+            <span
+              className="inline-flex items-center text-indigo-600 hover:text-indigo-800
+            dark:text-amber-300 dark:hover:text-amber-100 transition-colors font-medium"
+            >
               Dostępne wkrótce <span className="ml-2">→</span>
             </span>
           </motion.div>
@@ -101,7 +149,9 @@ const AiToolsSection = forwardRef((props, ref) => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-8 sm:p-12 max-w-5xl mx-auto shadow-2xl border border-white/20"
+          className="bg-gradient-to-r from-indigo-400 to-violet-400 dark:from-violet-600 dark:to-indigo-600
+          rounded-2xl p-8 sm:p-12 max-w-5xl mx-auto shadow-2xl
+          text-white"
         >
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-8 md:mb-0 md:mr-8">

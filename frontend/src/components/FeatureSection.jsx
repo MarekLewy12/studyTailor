@@ -19,7 +19,12 @@ const FeaturesSection = forwardRef((props, ref) => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-7xl font-bold mb-4 text-violet-600 dark:text-white">
+          <h2
+            className="text-4xl md:text-7xl font-bold mb-4
+            pb-3 bg-gradient-to-r from-indigo-400 via-purple-400 to-blue-400
+            dark:from-indigo-400 dark:via-purple-400 dark:to-blue-300
+            text-transparent bg-clip-text"
+          >
             Doświadcz nauki nowej generacji
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -37,7 +42,7 @@ const FeaturesSection = forwardRef((props, ref) => {
             viewport={{ once: true }}
             className="flex flex-col justify-center"
           >
-            <h3 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+            <h3 className="text-3xl font-bold mb-6 text-indigo-500 dark:text-white">
               Zintegrowany ekosystem nauki
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
@@ -109,16 +114,7 @@ const FeaturesSection = forwardRef((props, ref) => {
             viewport={{ once: true }}
             className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl overflow-hidden shadow-xl relative"
           >
-            <img
-              src="/dashboard-preview.png"
-              alt="StudyTailor Dashboard"
-              className="w-full h-auto object-cover rounded-lg"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  "https://via.placeholder.com/600x400?text=StudyTailor+Dashboard";
-              }}
-            />
+            <p>TODO</p>
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
               <div className="p-6 text-white">
                 <h4 className="text-xl font-bold mb-2">Intuicyjny interfejs</h4>

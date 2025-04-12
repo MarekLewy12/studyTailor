@@ -116,7 +116,7 @@ function Navbar() {
             ) : (
               <Link
                 to="/auth"
-                className="bg-white text-gray-700 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-300 shadow-lg"
+                className="bg-white text-gray-700 px-4 py-2 rounded-full hover:bg-indigo-100 transition-all duration-300 shadow-lg"
               >
                 Zaloguj się
               </Link>
@@ -137,12 +137,12 @@ function Navbar() {
       <div
         className={`${
           nav ? "translate-x-0" : "-translate-x-full"
-        } fixed top-0 left-0 w-64 h-full bg-orange-900 transform transition-transform duration-300 ease-in-out md:hidden`}
+        } fixed top-0 left-0 w-64 h-full bg-indigo-900 transform transition-transform duration-300 ease-in-out md:hidden`}
       >
-        <div className="flex justify-between items-center p-4 border-b border-orange-800">
+        <div className="flex justify-between items-center p-4 border-b border-indigo-800">
           <button
             onClick={handleNav}
-            className="hover:text-orange-200 transition-colors duration-300"
+            className="hover:text-indigo-200 transition-colors duration-300"
           >
             <AiOutlineClose size={24} />
           </button>
@@ -155,7 +155,7 @@ function Navbar() {
                 key={index}
                 to={item.dest}
                 onClick={() => setNav(false)}
-                className="block px-4 py-2 hover:bg-orange-800 transition-colors duration-300"
+                className="block px-4 py-2 hover:bg-indigo-800 transition-colors duration-300"
               >
                 {item.name}
               </Link>
