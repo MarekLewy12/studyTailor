@@ -137,7 +137,7 @@ class RegisterView(generics.CreateAPIView):
         activation_link = generate_activation_link(user, current_site.domain)
 
         subject = 'Aktywuj swoje konto StudyTailor'
-        message = render_to_string('emails/account_activation_email.html', {
+        message = render_to_string('emails.html', {
             'user': user,
             'activation_link': activation_link,
         })
