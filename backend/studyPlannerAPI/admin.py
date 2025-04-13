@@ -7,19 +7,20 @@ admin.site.register(ModelRequest)
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'password', 'album_number', 'is_staff', 'is_superuser')
+    list_display = ('username', 'email', 'album_number', 'is_active', 'is_staff', 'is_superuser')
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password', 'album_number', 'is_staff', 'is_superuser'),
+            'fields': ('username', 'email', 'password', 'password2', 'album_number', 'is_staff', 'is_superuser'),
         }),
     )
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Dane osobowe', {'fields': ('album_number',)}),
-        ('Uprawnienia', {'fields': ('is_staff', 'is_superuser', 'is_active')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'album_number')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
 @admin.register(Subject)
