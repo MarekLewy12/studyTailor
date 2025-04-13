@@ -27,6 +27,15 @@ from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSeri
 from .tasks import process_ai_assistant_request
 from celery.result import AsyncResult
 
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from .utils import account_activation_token
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from .utils import generate_activation_link
+
 @api_view(['GET'])
 def root_view(request):
     """
@@ -108,6 +117,7 @@ class RegisterView(generics.CreateAPIView):
         username = serializer.validated_data.get('username')
         password = serializer.validated_data.get('password')
         album_number = serializer.validated_data.get('album_number')
+        email = serializer.validated_data.get('email')
 
         # jeśli login istnieje
         if CustomUser.objects.filter(username=username).exists():
@@ -117,13 +127,56 @@ class RegisterView(generics.CreateAPIView):
         if CustomUser.objects.filter(album_number=album_number).exists():
             return Response({"error": "Użytkownik o takim numerze albumu już istnieje! Stwórz inny"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = CustomUser.objects.create_user(username=username, password=password, album_number=album_number)
-        refresh = RefreshToken.for_user(user)
+        # jeśli email istnieje
+        if CustomUser.objects.filter(email=email).exists():
+            return Response({"error": "Użytkownik o takim adresie email już istnieje! Stwórz inny"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+        user = CustomUser.objects.create_user(username=username, password=password, album_number=album_number, email=email, is_active=False)
+
+        current_site = get_current_site(request)
+        activation_link = generate_activation_link(user, current_site.domain)
+
+        subject = 'Aktywuj swoje konto StudyTailor'
+        message = render_to_string('emails/account_activation_email.html', {
+            'user': user,
+            'activation_link': activation_link,
+        })
+
+        try:
+            send_mail(
+                subject=subject,
+                message='',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                html_message=message,
+            )
+
+            return Response({
+                'message': "Zarejestrowano pomyślnie! Sprawdź swoją skrzynkę e-mail, aby aktywować konto.",
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            user.delete()
+            return Response({
+                'error': f"Wystąpił problem z wysłaniem e-maila aktywacyjnego: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def activate_account(request, uidb64, token):
+    """
+    Aktywacja konta użytkownika
+    """
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True  # aktywacja konta
+        user.save()  # zapisanie do bazy dopiero po aktywacji
+        return Response({"message": "Konto zostało aktywowane"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Link aktywacyjny jest nieprawidłowy lub wygasł"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Logowanie użytkownika
@@ -136,6 +189,10 @@ def login_view(request):
 
     if user is None or not user.check_password(password):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not user.is_active:
+        return Response({"error": "Konto nie jest aktywne"}, status=status.HTTP_403_FORBIDDEN)
+
     refresh = RefreshToken.for_user(user)
     return Response({
         'refresh': str(refresh),

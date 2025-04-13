@@ -25,7 +25,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
-from studyPlannerAPI.views import chat_history
+from studyPlannerAPI.views import chat_history, activate_account
 from rest_framework_simplejwt.views import TokenRefreshView
 
 schema_view = get_schema_view(
@@ -62,6 +62,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('materials/get_all_materials/', views.get_all_materials, name='get_all_materials'),
     path('task/<str:task_id>/', views.check_assistant_task, name='check_task'),
+    path('activate/<str:uidb64>/<str:token>/', activate_account, name='activate_account'),
 
 ]
 

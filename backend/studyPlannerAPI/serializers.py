@@ -13,6 +13,12 @@ class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128, write_only=True)
     album_number = serializers.CharField(max_length=5)
+    email = serializers.EmailField(max_length=254)
+
+    def validate_email(self, value):
+        if not value.endswith('@student.zut.edu.pl'):
+            raise serializers.ValidationError("Proszę podać poprawny adres email uczelni (@student.zut.edu.pl)")
+        return value
 
 # Serializator, opisujący zwracane dane w Response przy rejestracji użytkownika
 class TokenSerializer(serializers.Serializer):
