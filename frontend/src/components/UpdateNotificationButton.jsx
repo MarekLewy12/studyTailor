@@ -6,7 +6,7 @@ import { FaBell, FaInfoCircle, FaTimes } from "react-icons/fa";
 const updateInfo = [
   {
     id: 1,
-    date: "2025-04-01",
+    date: "2025-04-13",
     title: "Wprowadzenie weryfikacji przez email",
     description:
       "Zmieniono system rejestracji, aby zwiększyć bezpieczeństwo kont użytkowników. Wprowadzono obowiązkową weryfikację adresu email poprzez link aktywacyjny.",
@@ -15,7 +15,7 @@ const updateInfo = [
   },
   {
     id: 2,
-    date: "2025-03-28",
+    date: "2025-04-06",
     title: "Ulepszenia interfejsu użytkownika",
     description:
       "Wprowadzono nowy, bardziej przejrzysty interfejs logowania i rejestracji. Poprawiono również responsywność aplikacji na urządzeniach mobilnych.",
