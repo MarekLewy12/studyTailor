@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
@@ -11,6 +11,7 @@ import {
   FaInfoCircle,
   FaEnvelope,
 } from "react-icons/fa";
+import { useNotification } from "../context/NotificationContext.jsx";
 
 const AuthPage = () => {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -29,6 +30,9 @@ const AuthPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const { login, setUserInfo } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const { addNotification } = useNotification();
+  const location = useLocation();
 
   const validateAlbumNumber = useCallback(async () => {
     if (!formData.albumNumber || formData.albumNumber.length !== 5) return;
@@ -133,6 +137,37 @@ const AuthPage = () => {
     setError("");
     setSuccessMessage("");
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    const status = params.get("activation_status");
+
+    if (status) {
+      if (status === "success") {
+        addNotification({
+          id: Date.now(),
+          type: "success",
+          message:
+            "Konto zostało aktywowane pomyślnie. Możesz się teraz zalogować.",
+        });
+      } else if (status === "invalid") {
+        addNotification({
+          id: Date.now(),
+          type: "error",
+          message:
+            "Link aktywacyjny jest nieprawidłowy lub wygasł. Proszę spróbować ponownie.",
+        });
+      } else if (status === "already_active") {
+        addNotification({
+          id: Date.now(),
+          type: "info",
+          message:
+            "Konto zostało już wcześniej aktywowane. Możesz się na spokojnie zalogować.",
+        });
+      }
+    }
+  }, [addNotification, location.search]);
 
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-white overflow-hidden">
