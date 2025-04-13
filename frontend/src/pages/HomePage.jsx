@@ -6,6 +6,7 @@ import FAQSection from "../components/FAQSection.jsx";
 import AboutProjectSection from "../components/AboutProjectSection.jsx";
 import AiToolsSection from "../components/AiToolsSection.jsx";
 import CallToAction from "../components/CallToAction.jsx";
+import UpdateNotificationButton from "../components/UpdateNotificationButton.jsx";
 
 const HomePage = () => {
   const featuresRef = useRef(null);
@@ -34,21 +35,7 @@ const HomePage = () => {
       {/* AI Tools */}
       <AiToolsSection />
 
-      {/*<div className="container mx-auto py-10 px-4">*/}
-      {/*  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">*/}
-      {/*    /!* O projekcie *!/*/}
-      {/*    <AboutProjectSection />*/}
-
-      {/*    /!* FAQ *!/*/}
-      {/*    <FAQSection />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
-      {/*/!* Demo AI Assistant *!/*/}
-      {/*<AIAssistantDemo />*/}
-
-      {/* Call to action */}
-      {/*<CallToAction />*/}
+      <UpdateNotificationButton />
     </div>
   );
 };
