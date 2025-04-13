@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254)
 
     def validate_email(self, value):
-        if not value.endswith('@student.zut.edu.pl'):
+        if not value.endswith('@zut.edu.pl'):
             raise serializers.ValidationError("Proszę podać poprawny adres email uczelni (@student.zut.edu.pl)")
         return value
 
