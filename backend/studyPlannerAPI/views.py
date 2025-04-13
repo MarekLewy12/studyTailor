@@ -36,6 +36,15 @@ from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from .utils import generate_activation_link
 
+from django.shortcuts import redirect
+from django.conf import settings
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from .utils import account_activation_token
+from .models import CustomUser
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+
 @api_view(['GET'])
 def root_view(request):
     """
@@ -161,6 +170,7 @@ class RegisterView(generics.CreateAPIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def activate_account(request, uidb64, token):
     """
     Aktywacja konta użytkownika
@@ -171,12 +181,20 @@ def activate_account(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
 
+    login_url = settings.FRONTEND_LOGIN_URL
+
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True  # aktywacja konta
-        user.save()  # zapisanie do bazy dopiero po aktywacji
-        return Response({"message": "Konto zostało aktywowane"}, status=status.HTTP_200_OK)
+        if user.is_active:
+            activation_status = 'already_active'
+        else:
+            user.is_active = True
+            user.save()
+            activation_status = 'success'
+
+        return redirect(f"{login_url}?activation_status={activation_status}")
     else:
-        return Response({"error": "Link aktywacyjny jest nieprawidłowy lub wygasł"}, status=status.HTTP_400_BAD_REQUEST)
+        activation_status = 'invalid'
+        return redirect(f"{login_url}?activation_status={activation_status}")
 
 
 # Logowanie użytkownika
