@@ -18,7 +18,11 @@ const AuthPage = () => {
   const [isValidatingAlbum, setIsValidatingAlbum] = useState(false);
   const [albumWarning, setAlbumWarning] = useState(null);
   const [albumConfirmed, setAlbumConfirmed] = useState(false);
+  const [emailCorrect, setEmailCorrect] = useState(false);
+  const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showAlbumTooltip, setShowAlbumTooltip] = useState(false);
+  const [showEmailTooltip, setShowEmailTooltip] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -60,6 +64,29 @@ const AuthPage = () => {
     }
   }, [formData.albumNumber]);
 
+  const validateEmailAddress = useCallback(() => {
+    if (!formData.email || !formData.email.includes("@")) return;
+
+    setIsValidatingEmail(true);
+
+    if (formData.email.endsWith("@zut.edu.pl")) {
+      setEmailCorrect(true);
+    } else {
+      setEmailCorrect(false);
+    }
+    setIsValidatingEmail(false);
+  }, [formData.email]);
+
+  useEffect(() => {
+    if (!isLoginView && formData.email) {
+      const timer = setTimeout(() => {
+        validateEmailAddress();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [formData.email, isLoginView, validateEmailAddress]);
+
   useEffect(() => {
     if (!isLoginView && formData.albumNumber) {
       const timer = setTimeout(() => {
@@ -94,7 +121,7 @@ const AuthPage = () => {
             username: formData.username,
             password: formData.password,
             album_number: formData.albumNumber,
-            email: formData.email, // Email jest teraz wymagany
+            email: formData.email, // Email jest wymagany!
           };
 
       const response = await axios.post(endpoint, requestData);
@@ -140,31 +167,24 @@ const AuthPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-
     const status = params.get("activation_status");
 
     if (status) {
       if (status === "success") {
-        addNotification({
-          id: Date.now(),
-          type: "success",
-          message:
-            "Konto zostało aktywowane pomyślnie. Możesz się teraz zalogować.",
-        });
+        addNotification(
+          "Konto zostało aktywowane pomyślnie. Możesz się teraz zalogować.",
+          "success",
+        );
       } else if (status === "invalid") {
-        addNotification({
-          id: Date.now(),
-          type: "error",
-          message:
-            "Link aktywacyjny jest nieprawidłowy lub wygasł. Proszę spróbować ponownie.",
-        });
+        addNotification(
+          "Link aktywacyjny jest nieprawidłowy lub wygasł. Proszę spróbować ponownie.",
+          "error",
+        );
       } else if (status === "already_active") {
-        addNotification({
-          id: Date.now(),
-          type: "info",
-          message:
-            "Konto zostało już wcześniej aktywowane. Możesz się na spokojnie zalogować.",
-        });
+        addNotification(
+          "Konto zostało już wcześniej aktywowane. Możesz się na spokojnie zalogować.",
+          "info",
+        );
       }
     }
   }, [addNotification, location.search]);
@@ -262,23 +282,51 @@ const AuthPage = () => {
                   <div>
                     <label className="block text-gray-600 text-sm mb-1 flex items-center">
                       Email uczelniany
-                      <div className="relative group ml-2">
-                        <FaInfoCircle className="text-gray-400 hover:text-gray-600 cursor-pointer" />
-                        <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                          Podaj email uczelniany, na który wyślemy link
-                          aktywacyjny
+                      <div className="relative ml-2">
+                        <FaInfoCircle
+                          className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onMouseEnter={() => setShowEmailTooltip(true)}
+                          onMouseLeave={() => setShowEmailTooltip(false)}
+                        />
+                        <div
+                          className={`absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md transition-opacity z-10 ${showEmailTooltip ? "opacity-100" : "opacity-0"}`}
+                        >
+                          email powinien kończyć się na @zut.edu.pl
                         </div>
                       </div>
                     </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-                      placeholder="imię.nazwisko@student.zut.edu.pl"
-                      required
-                    />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                        placeholder="imię.nazwisko@student.zut.edu.pl"
+                        required
+                      />
+                      {isValidatingEmail && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <FaSpinner className="animate-spin text-blue-500" />
+                        </div>
+                      )}
+                      {emailCorrect && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <FaRegCheckCircle className="text-green-500" />
+                        </div>
+                      )}
+                      {formData.email &&
+                        !emailCorrect &&
+                        !isValidatingEmail && (
+                          <div className="mt-1 text-xs text-orange-600">
+                            <p>
+                              Podaj poprawny adres email uczelni (np.
+                              nazwa@zut.edu.pl)
+                            </p>
+                          </div>
+                        )}
+                    </div>
+
                     <p className="text-xs text-gray-500 mt-1">
                       Wymagane do weryfikacji i aktywacji konta
                     </p>
@@ -290,9 +338,15 @@ const AuthPage = () => {
                   <div>
                     <label className="block text-gray-600 text-sm mb-1 flex items-center">
                       Numer albumu
-                      <div className="relative group ml-2">
-                        <FaInfoCircle className="text-gray-400 hover:text-gray-600 cursor-pointer" />
-                        <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="relative ml-2">
+                        <FaInfoCircle
+                          className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onMouseEnter={() => setShowAlbumTooltip(true)}
+                          onMouseLeave={() => setShowAlbumTooltip(false)}
+                        />
+                        <div
+                          className={`absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md transition-opacity z-10 ${showAlbumTooltip ? "opacity-100" : "opacity-0"}`}
+                        >
                           5-cyfrowy numer albumu studenta ZUT
                         </div>
                       </div>
