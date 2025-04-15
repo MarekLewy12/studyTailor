@@ -455,30 +455,24 @@ def verify_album_number(request):
     album_number = request.data.get('album_number')
 
     try:
+        # 1. Sprawdzenie, czy numer albumu zwraca plan zajęć
         study_planner = StudyPlanner()
         schedule = study_planner.get_schedule(album_number)
 
         # Sprawdzenie czy otrzymaliśmy jakiekolwiek dane
-        if not schedule or len(schedule) == 0:
-            return Response({"valid": False, "message": "Nie znaleziono planu zajęć dla tego numeru albumu"})
+        valid = bool(schedule and len(schedule) > 0)
 
-        return Response({"valid": True})
+        # 2. Sprawdzenie, czy użytkownik o tym numerze albumu już istnieje
+        exists = CustomUser.objects.filter(album_number=album_number).exists()
+
+        # 3. Zwracamy obie informacje
+        if not valid:
+            return Response({"valid": False, "exists": exists, "message": "Nie znaleziono planu zajęć dla tego numeru albumu"})
+
+        return Response({"valid": True, "exists": exists})
 
     except Exception as e:
-        return Response({"valid": False, "message": str(e)}, status=500)
-
-
-@api_view(['POST'])
-def check_if_album_number_exists(request):
-    album_number = request.data.get('album_number')
-
-    if not album_number:
-        return Response({"error": "Brak numeru albumu"}, status=400)
-
-    # sprawdzenie czy istnieje użytkownik w bazie z danym numerem albumu
-    exists = CustomUser.objects.filter(album_number=album_number).exists()
-
-    return Response({'exists': exists})
+        return Response({"valid": False, "exists": False, "message": str(e)}, status=500)
 
 
 @api_view(['GET'])

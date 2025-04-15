@@ -63,7 +63,6 @@ urlpatterns = [
     path('materials/get_all_materials/', views.get_all_materials, name='get_all_materials'),
     path('task/<str:task_id>/', views.check_assistant_task, name='check_task'),
     path('activate/<str:uidb64>/<str:token>/', activate_account, name='activate_account'),
-    path('/check-if-album-number-exists', views.check_if_album_number_exists, name='check_if_album_number_exists'),
 
 ]
 
