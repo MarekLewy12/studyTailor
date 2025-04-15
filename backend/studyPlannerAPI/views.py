@@ -45,6 +45,8 @@ from .models import CustomUser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
+from studyPlanner.services import AIServiceFactory, AIModelService
+
 @api_view(['GET'])
 def root_view(request):
     """
@@ -518,7 +520,8 @@ def material_delete(request, subject_id, material_id):
     material.delete()
     return Response(status=204)
 
-# ---------- DEEPSEEK ----------
+# ---------- MODELE LLM ----------
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def subject_assistant(request, subject_id):

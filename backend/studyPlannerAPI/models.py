@@ -83,8 +83,12 @@ class StudySession(models.Model):
     answers = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     elapsed_time = models.FloatField(null=True, blank=True)
-
     message_type = models.CharField(max_length=20, default='question_answer')
+    ai_model = models.CharField(
+        max_length=20,
+        default='deepseek',
+        choices=[('deepseek', 'Deepseek AI'), ('gpt-4o', 'GPT-4o')]
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -99,6 +103,7 @@ class StudySession(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     last_schedule_update = models.DateTimeField(null=True, blank=True)
+
 
     def __str__(self):
         return f"Profil użytkownika: {self.user.username}"

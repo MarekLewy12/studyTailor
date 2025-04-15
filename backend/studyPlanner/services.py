@@ -1,3 +1,6 @@
+from abc import abstractmethod
+from time import perf_counter
+
 import openai
 import pandas as pd
 import requests
@@ -344,36 +347,33 @@ class StudyPlanner:
         print(tabulate(study_plan, headers="keys", tablefmt="psql", showindex=False))
 
 
-class DeepseekAIService:
-    """
-    Serwis do integracji z API Deepseek-chat
-    """
-    def __init__(self, api_key):
-        self.api_key = api_key or os.getenv('DEEPSEEK_API_KEY')
+class AIModelService:
+    """Klasa abstrakcyjna definiująca interfejs dla serwisów AI, Deepseek oraz GPT4o"""
+
+    def __init__(self, api_key=None):
+        self.api_key = api_key or self._get_default_api_key()
         if not self.api_key:
-            raise ValueError(
-                "Brak klucza API Deepseek. Upewnij się, że zmienna środowiskowa DEEPSEEK_API_KEY jest ustawiona."
-            )
+            raise ValueError(f"Brak klucza API dla {self.__class__.__name__}")
+        self.client = self._initialize_client()
 
-        self.client = OpenAI(
-            api_key=self.api_key,
-            base_url="https://api.deepseek.com/",
-        )
+    @abstractmethod
+    def _get_default_api_key(self):
+        """Pobranie klucza API"""
+        pass
 
-    def generate_response(self, prompt, system_prompt=None, conversation_history=None, temperature=0.7, max_tokens=2048):
-        """
-        Generuje odpowiedź od modelu Deepseek
+    @abstractmethod
+    def _initialize_client(self):
+        """Inicjalizacja klienta API"""
+        pass
 
-        Args:
-            prompt (str): Zapytanie użytkownika
-            system_prompt (str, optional): Instrukcja systemowa dla modelu
-            temperature (float, optional): Parametr losowości odpowiedzi (0.0-1.0)
-            max_tokens (int, optional): Maksymalna długość odpowiedzi
-            stream (bool, optional): Czy odpowiedź ma być strumieniowa
+    @abstractmethod
+    def _get_model_name(self):
+        """Zwraca nazwę modelu używanego w zapytaniach API"""
+        pass
 
-        Returns:
-            str: Odpowiedź modelu
-        """
+    def generate_response(self, prompt, system_prompt=None, conversation_history=None,
+                          temperature=0.7, max_tokens=2048):
+        """Generowanie odpowiedzi od wybranego modelu AI"""
         if system_prompt is None:
             system_prompt = "Jesteś pomocnym asystentem nauki, który udziela rzeczowych i dokładnych odpowiedzi."
 
@@ -388,11 +388,9 @@ class DeepseekAIService:
             # pytanie użytkownika
             messages.append({"role": "user", "content": prompt})
 
-            from time import perf_counter
-
             t1_start = perf_counter()
             response = self.client.chat.completions.create(
-                model="deepseek-chat",
+                model=self._get_model_name(),  # użycie nazwy modelu
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature
@@ -407,25 +405,16 @@ class DeepseekAIService:
             }
 
         except Exception as e:
-            print(f"Błąd podczas komunikacji z API Deepseek: {str(e)}")
-
+            print(f"Błąd podczas komunikacji z API {self.__class__.__name__}: {str(e)}")
             return {
                 "response": "Przepraszam, wystąpił problem z połączeniem do asystenta AI. Spróbuj ponownie później.",
                 "elapsed_time": 0
             }
 
-    def generate_study_assistant_response(self, subject_name, question, subject_type=None, conversation_history=None):
+    def generate_study_assistant_response(self, subject_name, question, subject_type=None,
+                                          conversation_history=None):
         """
-        Generuje odpowiedź od modelu Deepseek dla asystenta nauki
-
-        Args:
-            subject_name (str): Nazwa przedmiotu
-            question (str): Zadane pytanie
-            subject_type (str, optional): Typ przedmiotu (np. "wykład", "laboratorium")
-            conversation_history (list, optional): Historia konwersacji
-
-        Returns:
-            str: Odpowiedź asystenta nauki
+        Wspólna implementacja generowania odpowiedzi asystenta nauki.
         """
         subject_context = f"Przedmiotu: '{subject_name}'"
         if subject_type:
@@ -435,23 +424,84 @@ class DeepseekAIService:
         Jesteś asystentem nauki specjalizującym się w {subject_context}. 
         Twoje zadanie to pomagać studentom i uczniom w zrozumieniu materiału, wyjaśniać trudne koncepcje 
         i wspierać proces nauki. Udzielaj rzeczowych, dokładnych odpowiedzi opartych na faktach.
-        
+
         Twój ton powinien być:
         - Profesjonalny, ale przyjazny
         - Pomocny i cierpliwy
         - Jasny i zwięzły, ale dokładny
-        
+
         Jeśli nie znasz odpowiedzi na pytanie, przyznaj to zamiast wymyślać informacje.
         Używaj przykładów, gdy to pomocne.
-        
+
         Formatuj wzory matematyczne używając składni LaTeX:
         - Dla wzorów inline użyj $wzór$
         - Dla wzorów w osobnej linii użyj $$wzór$$
-        Pisz zwięźle i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
-        
+        Pisz zwięźnie i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
+
         Odpowiadaj w języku polskim.
         """
 
         prompt = f"Jako student uczący się {subject_context}, mam następujące pytanie: {question}"
 
         return self.generate_response(prompt, system_prompt=system_prompt, conversation_history=conversation_history)
+
+
+class DeepseekAIService(AIModelService):
+    """
+    Deepseek-chat
+    """
+    def _get_default_api_key(self):
+        return os.getenv('DEEPSEEK_API_KEY')
+
+    def _initialize_client(self):
+        return OpenAI(
+            api_key=self.api_key,
+            base_url="https://api.deepseek.com/"
+        )
+
+    def _get_model_name(self):
+        return "deepseek-chat"
+
+
+class GPT4oService(AIModelService):
+    """
+    GPT-4o
+    """
+
+    def _get_default_api_key(self):
+        return os.getenv('OPENAI_API_KEY')
+
+    def _initialize_client(self):
+        return OpenAI(api_key=self.api_key)
+
+    def _get_model_name(self):
+        return "gpt-4o"
+
+
+class AIServiceFactory:
+    """
+    Fabryka tworząca odpowiedni serwis AI na podstawie wybranego modelu.
+    """
+
+    @staticmethod
+    def create_service(model_name, api_key=None):
+        """
+        Tworzy instancję serwisu AI na podstawie nazwy modelu
+
+        Args:
+            model_name (str): Nazwa modelu, np. 'deepseek', 'gpt-4o'
+            api_key (str, optional): Opcjonalny klucz API
+
+        Returns:
+            AIModelService: Instancja serwisu AI
+
+        Raises:
+            ValueError: Jeśli podano nieprawidłową nazwę modelu
+        """
+        if model_name.lower() == 'deepseek':
+            return DeepseekAIService(api_key)
+        elif model_name.lower() == 'gpt-4o':
+            return GPT4oService(api_key)
+        else:
+            raise ValueError(f"Nieznany model AI: {model_name}")
+
