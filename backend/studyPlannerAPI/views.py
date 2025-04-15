@@ -468,6 +468,19 @@ def verify_album_number(request):
         return Response({"valid": False, "message": str(e)}, status=500)
 
 
+@api_view(['POST'])
+def check_if_album_number_exists(request):
+    album_number = request.data.get('album_number')
+
+    if not album_number:
+        return Response({"error": "Brak numeru albumu"}, status=400)
+
+    # sprawdzenie czy istnieje użytkownik w bazie z danym numerem albumu
+    exists = CustomUser.objects.filter(album_number=album_number).exists()
+
+    return Response({'exists': exists})
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def material_download(request, subject_id, material_id):
