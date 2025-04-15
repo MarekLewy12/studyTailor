@@ -1,15 +1,15 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import {
+  FaEnvelope,
   FaEye,
   FaEyeSlash,
+  FaInfoCircle,
   FaRegCheckCircle,
   FaSpinner,
-  FaInfoCircle,
-  FaEnvelope,
 } from "react-icons/fa";
 import { useNotification } from "../context/NotificationContext.jsx";
 
@@ -97,6 +97,21 @@ const AuthPage = () => {
     }
   }, [formData.albumNumber, isLoginView, validateAlbumNumber]);
 
+  useEffect(() => {
+    if (!formData.email.includes("zut.edu.pl")) return;
+
+    const beforeAt = formData.email.split("@")[0];
+
+    const match = beforeAt.match(/[a-zA-Z]{2}(\d{5})/);
+
+    if (match && match[1]) {
+      const albumNumber = match[1];
+      setFormData((prev) => ({
+        ...prev,
+        albumNumber: albumNumber,
+      }));
+    }
+  }, [formData.email]);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -210,7 +225,7 @@ const AuthPage = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md px-6"
+        className="relative z-10 w-full max-w-md px-6 py-4 sm:py-6 md:py-8"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -347,7 +362,8 @@ const AuthPage = () => {
                         <div
                           className={`absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md transition-opacity z-10 ${showAlbumTooltip ? "opacity-100" : "opacity-0"}`}
                         >
-                          5-cyfrowy numer albumu studenta ZUT
+                          5-cyfrowy numer albumu studenta ZUT, uzupełniany
+                          automatycznie na podstawie adresu email.
                         </div>
                       </div>
                     </label>
