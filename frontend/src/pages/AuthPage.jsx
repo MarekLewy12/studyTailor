@@ -47,12 +47,22 @@ const AuthPage = () => {
         album_number: formData.albumNumber,
       });
 
-      if (!response.data.valid) {
+      const { valid, exists } = response.data;
+
+      if (!valid) {
+        // Numer albumu jest niepoprawny
         setAlbumWarning(
           response.data.message || "Ten numer albumu jest nieprawidłowy",
         );
         setAlbumConfirmed(false);
+      } else if (exists) {
+        // Numer albumu jest poprawny, ale użytkownik już istnieje
+        setAlbumWarning(
+          "Użytkownik o tym numerze albumu już istnieje. Czy chcesz się zalogować?",
+        );
+        setAlbumConfirmed(false);
       } else {
+        // Numer albumu jest poprawny i unikalny
         setAlbumWarning(null);
         setAlbumConfirmed(true);
       }
@@ -225,7 +235,7 @@ const AuthPage = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md px-6 py-4 sm:py-20 md:py-8"
+        className="relative z-10 md:w-6/12 px-6 py-4 sm:py-24 md:py-28"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -234,14 +244,14 @@ const AuthPage = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: isLoginView ? 20 : -20 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg p-8 shadow-lg"
+            className="bg-white rounded-lg p-8 shadow-xl border-4 border-indigo-200"
           >
             {/* Logo i nagłówek */}
             <div className="text-center mb-8">
               <img
                 src="/new_logo_big.png"
                 alt="StudyTailor Logo"
-                className="h-20 w-auto mx-auto mb-4"
+                className="h-28 w-auto mx-auto mb-4"
               />
               <h1 className="text-2xl font-bold text-gray-800">
                 {isLoginView ? "Logowanie" : "Rejestracja"}
@@ -395,7 +405,20 @@ const AuthPage = () => {
                         </div>
                       )}
                     </div>
-                    {albumWarning && (
+                    {albumWarning && albumWarning.includes("już istnieje") && (
+                      <div className="mt-1 text-xs text-red-600">
+                        <p>{albumWarning}</p>
+                        <button
+                          type="button"
+                          onClick={toggleView}
+                          className="mt-1 text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Zaloguj się
+                        </button>
+                      </div>
+                    )}
+
+                    {albumWarning && !albumWarning.includes("już istnieje") && (
                       <div className="mt-1 text-xs text-orange-600">
                         <p>{albumWarning}</p>
                         <button
