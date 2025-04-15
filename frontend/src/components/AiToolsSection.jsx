@@ -48,7 +48,7 @@ const AiToolsSection = forwardRef((props, ref) => {
                 initial={{ width: 0 }}
                 whileInView={{ width: "100%" }}
                 transition={{
-                  duration: 1.2,
+                  duration: 1.8,
                   delay: 0.8,
                   ease: "easeOut",
                 }}

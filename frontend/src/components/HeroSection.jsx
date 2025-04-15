@@ -129,9 +129,11 @@ const HeroSection = ({ scrollToFeatures }) => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
-            <span className="block mb-6">Twoja nauka,</span>
+            <span className="block mb-6">
+              Twój plan, materiały i rozmowy AI
+            </span>
             <span className="bg-gradient-to-r from-indigo-200 to-purple-300 text-transparent bg-clip-text">
-              Twój osobisty asystent
+              w jednym miejscu
             </span>
           </h1>
 

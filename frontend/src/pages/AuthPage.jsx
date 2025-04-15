@@ -382,7 +382,9 @@ const AuthPage = () => {
                           />
                           <div
                             className={`absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-md transition-opacity z-10 ${
-                              showEmailTooltip ? "opacity-100" : "opacity-0"
+                              showEmailTooltip
+                                ? "opacity-100"
+                                : "opacity-0 pointer-events-none"
                             }`}
                           >
                             email powinien kończyć się na @zut.edu.pl
@@ -396,7 +398,7 @@ const AuthPage = () => {
                           value={formData.email}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                          placeholder="imię.nazwisko@student.zut.edu.pl"
+                          placeholder="[inicjały]@zut.edu.pl"
                           required
                         />
                         {isValidatingEmail && (
@@ -410,6 +412,9 @@ const AuthPage = () => {
                           </div>
                         )}
                         {formData.email &&
+                          formData.email.includes("@") &&
+                          (formData.email.endsWith(".pl") ||
+                            formData.email.endsWith(".com")) &&
                           !emailCorrect &&
                           !isValidatingEmail && (
                             <div className="mt-1 text-xs text-orange-600 dark:text-orange-400">
@@ -440,7 +445,9 @@ const AuthPage = () => {
                           />
                           <div
                             className={`absolute left-0 bottom-full mb-2 w-48 p-2 bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-md transition-opacity z-10 ${
-                              showAlbumTooltip ? "opacity-100" : "opacity-0"
+                              showAlbumTooltip
+                                ? "opacity-100"
+                                : "opacity-0 pointer-events-none"
                             }`}
                           >
                             5-cyfrowy numer albumu studenta ZUT, uzupełniany
@@ -619,7 +626,6 @@ const AuthPage = () => {
                 icon={card.icon}
                 title={card.title}
                 description={card.description}
-                delay={0.2 + index * 0.1}
               />
             ))}
           </div>
