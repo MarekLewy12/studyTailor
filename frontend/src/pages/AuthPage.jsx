@@ -76,10 +76,11 @@ const AuthPage = () => {
         "Wszystkie twoje materiały edukacyjne w jednym miejscu. Dodawaj pliki, linki i notatki do każdego przedmiotu.",
     },
     {
-      icon: <FaChartLine className="text-red-500 dark:text-red-400 text-3xl" />,
-      title: "Personalizowany plan nauki",
+      icon: <FaRobot className="text-red-500 dark:text-red-400 text-3xl" />,
+      title: "Zaawansowane funkcje AI",
       description:
-        "Twórz spersonalizowane plany nauki dostosowane do swojego harmonogramu i stylu uczenia się.",
+        "Twórz fiszki i quizy na podstawie swoich materiałów, aby już nigdy nie czuć się zagubionym w jakimkolwiek temacie! Skorzystaj z mocy sztucznej inteligencji.",
+      comingSoon: true,
     },
     {
       icon: (
@@ -88,6 +89,7 @@ const AuthPage = () => {
       title: "Statystyki i analityka",
       description:
         "Śledzenie postępów w czasie rzeczywistym z wizualizacją danych, które pomogą Ci zoptymalizować proces nauki.",
+      comingSoon: true,
     },
   ];
 
@@ -269,8 +271,13 @@ const AuthPage = () => {
   }, [addNotification, location.search]);
 
   // karty funkcji
-  const FeatureCard = ({ icon, title, description, delay }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-all">
+  const FeatureCard = ({ icon, title, description, comingSoon }) => (
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-all relative">
+      {comingSoon && (
+        <div className="absolute top-0 right-0 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs font-medium py-1 px-2 rounded-bl-lg rounded-tr-lg transform translate-x-0 -translate-y-0 shadow-sm">
+          Dostępne wkrótce
+        </div>
+      )}
       <div className="mb-4">{icon}</div>
       <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
         {title}
@@ -280,7 +287,7 @@ const AuthPage = () => {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative bg-white dark:bg-gray-900 overflow-hidden">
+    <div className="min-h-screen flex items-start justify-center relative bg-white dark:bg-gray-900 overflow-hidden pt-12">
       <div className="absolute inset-0 pointer-events-none">
         {/* Fala dekoracyjna na dole */}
         <svg
@@ -296,13 +303,13 @@ const AuthPage = () => {
         </svg>
       </div>
 
-      <div className="container z-10 mx-auto px-4 py-10 flex flex-col lg:flex-row gap-16 items-center lg:items-start justify-center">
+      <div className="container z-10 mx-auto px-4 py-6 md:py-10 flex flex-col lg:flex-row gap-8 md:gap-10 lg:gap-16 items-center lg:items-start justify-center">
         {/* Lewa kolumna - formularz */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full lg:w-5/12 max-w-xl lg:pt-8"
+          className="w-full lg:w-5/12 max-w-xl lg:pt-16"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -614,18 +621,26 @@ const AuthPage = () => {
         </motion.div>
 
         {/* Prawa kolumna - karty funkcjonalności */}
-        <div className="w-full lg:w-6/12 max-w-xl flex flex-col">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-8">
+        <div className="w-full lg:w-6/12 max-w-xl flex flex-col mt-4 md:mt-0">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white text-center mb-4 md:mb-8 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 inline-block mx-auto rounded-lg">
             Odkryj możliwości StudyTailor
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 text-blue-700 dark:text-blue-300 text-sm rounded-r-lg">
+            <p className="flex items-center">
+              <FaInfoCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+              Funkcje są obecnie dostępne tylko dla studentów ZUT-u.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {featureCards.map((card, index) => (
               <FeatureCard
                 key={index}
                 icon={card.icon}
                 title={card.title}
                 description={card.description}
+                comingSoon={card.comingSoon}
               />
             ))}
           </div>
