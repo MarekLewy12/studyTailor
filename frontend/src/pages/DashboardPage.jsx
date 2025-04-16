@@ -19,6 +19,7 @@ import {
   FaGraduationCap,
   FaTrophy,
   FaCog,
+  FaLightbulb,
 } from "react-icons/fa";
 import PageTitle from "../components/PageTitle.jsx";
 
@@ -190,12 +191,13 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen pt-20 px-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto">
         <PageTitle title="Twój Dashboard" showUsername={true} />
+
         {/* Nawigacja zakładek */}
         <div className="mb-8 flex justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-md">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-shadow transition-border duration-300">
             <button
               onClick={() => setActiveTab("upcoming")}
               className={`px-4 py-2 rounded-md transition-all ${
@@ -227,7 +229,7 @@ const DashboardPage = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border-4 border-indigo-200 dark:border-indigo-800"
               >
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
@@ -256,7 +258,7 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-shadow transition-border duration-300"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
@@ -320,7 +322,7 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700"
               >
                 <div className="flex items-center mb-4">
                   <FaRobot className="text-2xl text-indigo-600 dark:text-indigo-400 mr-3" />
@@ -333,7 +335,7 @@ const DashboardPage = () => {
                 </p>
                 <Link
                   to="/assistant"
-                  className="block text-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-2 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition duration-300 text-sm"
+                  className="block text-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-2 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition duration-300 text-sm font-medium"
                 >
                   Otwórz asystenta
                 </Link>
@@ -343,7 +345,7 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700"
               >
                 <div className="flex items-center mb-4">
                   <FaUserCog className="text-2xl text-indigo-600 dark:text-indigo-400 mr-3" />
@@ -374,7 +376,7 @@ const DashboardPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 lg:col-span-3"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 lg:col-span-3 border-4 border-indigo-200 dark:border-indigo-800"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
@@ -434,7 +436,7 @@ const DashboardPage = () => {
                             key={subject.id}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className={`p-4 rounded-lg bg-gradient-to-br shadow-md hover:shadow-lg transition-all duration-300 ${
+                            className={`p-4 rounded-lg bg-gradient-to-br shadow-md hover:shadow-lg transition-all duration-300 border ${
                               subject.is_mastered
                                 ? "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/40 border-green-500"
                                 : "from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/40 border-indigo-500"
@@ -522,7 +524,7 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-center py-10 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                   <FaCalendarAlt className="mx-auto text-4xl mb-3 text-gray-400 dark:text-gray-500" />
                   <p className="text-lg">
                     Brak nadchodzących zajęć. W wybranym okresie nie ma
@@ -546,7 +548,7 @@ const DashboardPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-4 border-indigo-200 dark:border-indigo-800"
             >
               <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
                 <FaChartPie className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
@@ -554,7 +556,7 @@ const DashboardPage = () => {
               </h2>
 
               <div className="grid grid-cols-1 gap-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500 flex items-center justify-between">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500 flex items-center justify-between hover:shadow-md transition-all">
                   <div className="flex items-center">
                     <FaGraduationCap className="text-blue-500 text-xl mr-3" />
                     <span className="text-gray-700 dark:text-gray-300">
@@ -566,7 +568,7 @@ const DashboardPage = () => {
                   </span>
                 </div>
 
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500 flex items-center justify-between">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500 flex items-center justify-between hover:shadow-md transition-all">
                   <div className="flex items-center">
                     <FaCheck className="text-green-500 text-xl mr-3" />
                     <span className="text-gray-700 dark:text-gray-300">
@@ -578,7 +580,7 @@ const DashboardPage = () => {
                   </span>
                 </div>
 
-                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500 flex items-center justify-between">
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500 flex items-center justify-between hover:shadow-md transition-all">
                   <div className="flex items-center">
                     <FaCalendarAlt className="text-purple-500 text-xl mr-3" />
                     <span className="text-gray-700 dark:text-gray-300">
@@ -590,6 +592,20 @@ const DashboardPage = () => {
                   </span>
                 </div>
               </div>
+
+              <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                <div className="flex items-center mb-2">
+                  <FaLightbulb className="text-yellow-500 mr-2" />
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                    Wskazówka
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Regularnie oznaczaj przyswojone przedmioty, aby śledzić swoje
+                  postępy. Możesz też korzystać z asystenta AI, aby lepiej
+                  zrozumieć trudne zagadnienia.
+                </p>
+              </div>
             </motion.div>
 
             {/* Najbliższe zajęcia */}
@@ -597,7 +613,7 @@ const DashboardPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-all"
             >
               <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
                 <FaClock className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
@@ -609,7 +625,7 @@ const DashboardPage = () => {
                   {filteredSubjects.slice(0, 3).map((subject) => (
                     <div
                       key={subject.id}
-                      className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg flex items-center justify-between"
+                      className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg flex items-center justify-between border border-indigo-100 dark:border-indigo-800 hover:shadow-md transition-all"
                     >
                       <div>
                         <h4 className="font-semibold text-gray-800 dark:text-gray-200">
@@ -645,13 +661,13 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <FaCalendarAlt className="mx-auto text-4xl mb-2 opacity-30" />
                   <p>Brak nadchodzących zajęć</p>
                 </div>
               )}
 
-              <button className="mt-4 w-full py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center">
+              <button className="mt-4 w-full py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center border border-gray-200 dark:border-gray-600">
                 <FaCalendarAlt className="mr-2" />
                 Zobacz wszystkie
               </button>
@@ -662,7 +678,7 @@ const DashboardPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
             >
               <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center">
                 <FaTrophy className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
@@ -671,7 +687,7 @@ const DashboardPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div
-                  className={`p-4 rounded-lg text-center ${progress >= 25 ? "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/20 dark:to-yellow-900/40" : "bg-gray-100 dark:bg-gray-700"}`}
+                  className={`p-4 rounded-lg text-center ${progress >= 25 ? "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/20 dark:to-yellow-900/40 border border-yellow-300 dark:border-yellow-800" : "bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"}`}
                 >
                   <FaStar
                     className={`mx-auto text-2xl mb-2 ${progress >= 25 ? "text-yellow-500" : "text-gray-400"}`}
@@ -696,7 +712,7 @@ const DashboardPage = () => {
                 </div>
 
                 <div
-                  className={`p-4 rounded-lg text-center ${progress >= 50 ? "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/20 dark:to-indigo-900/40" : "bg-gray-100 dark:bg-gray-700"}`}
+                  className={`p-4 rounded-lg text-center ${progress >= 50 ? "bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/20 dark:to-indigo-900/40 border border-indigo-300 dark:border-indigo-800" : "bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"}`}
                 >
                   <FaStar
                     className={`mx-auto text-2xl mb-2 ${progress >= 50 ? "text-indigo-500" : "text-gray-400"}`}
@@ -721,7 +737,7 @@ const DashboardPage = () => {
                 </div>
 
                 <div
-                  className={`p-4 rounded-lg text-center ${progress >= 75 ? "bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-900/40" : "bg-gray-100 dark:bg-gray-700"}`}
+                  className={`p-4 rounded-lg text-center ${progress >= 75 ? "bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-900/40 border border-purple-300 dark:border-purple-800" : "bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"}`}
                 >
                   <FaStar
                     className={`mx-auto text-2xl mb-2 ${progress >= 75 ? "text-purple-500" : "text-gray-400"}`}
@@ -746,7 +762,7 @@ const DashboardPage = () => {
                 </div>
 
                 <div
-                  className={`p-4 rounded-lg text-center ${progress >= 100 ? "bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/20 dark:to-green-900/40" : "bg-gray-100 dark:bg-gray-700"}`}
+                  className={`p-4 rounded-lg text-center ${progress >= 100 ? "bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/20 dark:to-green-900/40 border border-green-300 dark:border-green-800" : "bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"}`}
                 >
                   <FaStar
                     className={`mx-auto text-2xl mb-2 ${progress >= 100 ? "text-green-500" : "text-gray-400"}`}
