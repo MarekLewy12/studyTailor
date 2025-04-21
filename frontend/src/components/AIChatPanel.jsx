@@ -13,6 +13,7 @@ import {
   FaTrash,
   FaUserGraduate,
 } from "react-icons/fa";
+import ModelChangeConfirmPopup from "./ModelChangeConfirmPopup.jsx";
 
 const AIChatPanel = ({ isOpen, onClose, subject }) => {
   const [messages, setMessages] = useState([]);
@@ -24,6 +25,12 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("deepseek");
+  const [previousModel, setPreviousModel] = useState(selectedModel);
+
+  // zmiana modelu
+  const [showModelChangeConfirm, setShowModelChangeConfirm] = useState(false);
+  const [pendingModel, setPendingModel] = useState(null);
 
   const popupRef = useRef(null);
 
@@ -88,6 +95,33 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showDeleteConfirm]);
+
+  // funkcje dotyczące zmiany modelu
+  const handleModelChange = (e) => {
+    const newModel = e.target.value;
+    if (newModel !== selectedModel && messages.length > 1) {
+      // Wybrano nowy model -> popup + zmiana modelu w stanie
+      setPendingModel(newModel);
+      setShowModelChangeConfirm(true);
+    } else {
+      // Jeśli nie ma historii konwersacji, po prostu zmiana modelu
+      setSelectedModel(newModel);
+    }
+  };
+
+  const confirmModelChange = () => {
+    // Użytkownik zgodził się zmienić model -> konwersacja jest czyszczona
+    setSelectedModel(pendingModel);
+    confirmAndDeleteConversation();
+    setShowModelChangeConfirm(false);
+    setPendingModel(null);
+  };
+
+  const cancelModelChange = () => {
+    // Użytkownik anulował zmianę modelu -> powrót do poprzedniego modelu
+    setShowModelChangeConfirm(false);
+    setPendingModel(null);
+  };
 
   const confirmAndDeleteConversation = async () => {
     try {
@@ -205,7 +239,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
 
       const response = await axios.post(
         `/subject/${subject.id}/assistant/`,
-        { question: userMessage.text },
+        { question: userMessage.text, model: selectedModel },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -215,6 +249,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
 
       // Pobranie id zadania
       const taskId = response.data.task_id;
+      const responseModel = response.data.model;
 
       const checkTaskStatus = async () => {
         try {
@@ -238,6 +273,7 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                 text: result.answer,
                 timestamp: result.timestamp || new Date().toISOString(),
                 elapsed_time: result.elapsed_time,
+                model: result.model || responseModel,
               },
             ]);
             setIsLoading(false);
@@ -354,6 +390,14 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                 </h2>
               </div>
               <div className="flex items-center">
+                <select
+                  value={selectedModel}
+                  onChange={handleModelChange}
+                  className="mr-3 bg-indigo-500 border-none rounded py-1 px-2 text-sm"
+                >
+                  <option value="deepseek">Deepseek</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                </select>
                 <button
                   onClick={onClose}
                   className="p-2 rounded-full hover:bg-gray-200/20 transition-colors duration-300"
@@ -410,10 +454,22 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
                       </p>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
                         {formatMessageTime(message.timestamp)}
-                        {message.sender === "ai" && message.elapsed_time && (
-                          <span className="ml-2">
-                            Czas odpowiedzi: {message.elapsed_time.toFixed(2)}s
-                          </span>
+                        {message.sender === "ai" && (
+                          <>
+                            {message.elapsed_time && (
+                              <span className="ml-2">
+                                Czas odpowiedzi:{" "}
+                                {message.elapsed_time.toFixed(2)}s
+                              </span>
+                            )}
+                            {message.model && (
+                              <span className="ml-2 bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">
+                                {message.model === "deepseek"
+                                  ? "Deepseek Chat"
+                                  : "GPT-4o"}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -594,6 +650,13 @@ const AIChatPanel = ({ isOpen, onClose, subject }) => {
               </form>
             </div>
           </motion.div>
+          <ModelChangeConfirmPopup
+            isOpen={showModelChangeConfirm}
+            onCancel={cancelModelChange}
+            onConfirm={confirmModelChange}
+            currentModel={selectedModel}
+            newModel={pendingModel}
+          />
         </>
       )}
     </AnimatePresence>
