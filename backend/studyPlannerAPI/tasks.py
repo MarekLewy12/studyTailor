@@ -1,12 +1,12 @@
 from celery import shared_task
 from django.utils import timezone
 from .models import Subject, StudySession
-from studyPlanner.services import DeepseekAIService
+from studyPlanner.services import AIServiceFactory
 from .conversation_context import ConversationContext
 import os
 
 @shared_task(bind=True, max_retries=3)
-def process_ai_assistant_request(self, subject_id, user_id, question):
+def process_ai_assistant_request(self, subject_id, user_id, question, model_name='deepseek'):
     """Przetworzenie zapytania do asystenta AI w tle"""
     try:
         subject = Subject.objects.get(id=subject_id, user_id=user_id)
@@ -15,7 +15,7 @@ def process_ai_assistant_request(self, subject_id, user_id, question):
         if not api_key:
             raise ValueError("Brak klucza API Deepseek")
 
-        ai_service = DeepseekAIService(api_key)
+        ai_service = AIServiceFactory.create_service(model_name=model_name)
 
         # historia konwersacji
         conversation_history = ConversationContext.get_conversation_history(
@@ -44,7 +44,8 @@ def process_ai_assistant_request(self, subject_id, user_id, question):
             questions=question,
             answers=response,
             elapsed_time=elapsed_time,
-            created_at=timezone.now()
+            created_at=timezone.now(),
+            ai_model=model_name,
         )
 
         # Dodanie do historii konwersacji
@@ -62,6 +63,7 @@ def process_ai_assistant_request(self, subject_id, user_id, question):
             "answer": response,
             "timestamp": study_session.created_at.isoformat(),
             "elapsed_time": elapsed_time,
+            "model": model_name
         }
 
     except Subject.DoesNotExist:

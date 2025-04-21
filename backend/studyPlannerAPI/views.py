@@ -537,16 +537,23 @@ def subject_assistant(request, subject_id):
     if not question:
         return Response({"error": "Brak pytania"}, status=400)
 
+    model_name = request.data.get('model', 'deepseek')
+
+    if model_name not in ['deepseek', 'gpt-4o']:
+        return Response({"error": "Nieprawidłowy model AI"}, status=400)
+
     task = process_ai_assistant_request.delay(
         subject_id=subject.id,
         user_id=request.user.id,
-        question=question
+        question=question,
+        model_name=model_name
     )
 
     return Response({
         "task_id": task.id,
         "status": "processing",
-        "message": "Twoje pytanie zostało przekazane do przetworzenia. Oczekuj na odpowiedź."
+        "message": "Twoje pytanie zostało przekazane do przetworzenia. Oczekuj na odpowiedź.",
+        "model": model_name
     })
 
 @api_view(['GET'])
