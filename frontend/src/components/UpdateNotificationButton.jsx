@@ -12,6 +12,7 @@ const updateInfo = [
       "Zmieniono system rejestracji, aby zwiększyć bezpieczeństwo kont użytkowników. Wprowadzono obowiązkową weryfikację adresu email poprzez link aktywacyjny.",
     isImportant: true,
     affectsUsers: true,
+    isAIRelated: false,
   },
   {
     id: 2,
@@ -21,11 +22,26 @@ const updateInfo = [
       "Wprowadzono nowy, bardziej przejrzysty interfejs logowania i rejestracji. Poprawiono również responsywność aplikacji na urządzeniach mobilnych.",
     isImportant: false,
     affectsUsers: false,
+    isAIRelated: false,
+  },
+  {
+    id: 3,
+    date: "2025-04-22",
+    title: "Możliwość zmiany modelu w czacie AI",
+    description:
+      "Dodano możliwość zmiany modelu z Deepseek na GPT-4o oraz odwrotnie. Umożliwia to użytkownikom korzystanie z różnych modeli AI w zależności od ich potrzeb.",
+    isImportant: false,
+    affectsUsers: false,
+    isAIRelated: true,
   },
 ];
 
 // Modal z informacjami o aktualizacjach
 const UpdateModal = ({ isOpen, onClose }) => {
+  const sortedUpdates = [...updateInfo].sort((a, b) => {
+    return new Date(b.date) - new Date(a.date);
+  });
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -74,13 +90,15 @@ const UpdateModal = ({ isOpen, onClose }) => {
 
             {/* Lista aktualizacji */}
             <div className="space-y-6">
-              {updateInfo.map((update) => (
+              {sortedUpdates.map((update) => (
                 <div
                   key={update.id}
                   className={`p-4 rounded-lg border ${
                     update.isImportant
                       ? "border-red-200 bg-red-50 dark:border-red-700 dark:bg-red-900/10"
-                      : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
+                      : update.isAIRelated
+                        ? "border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/10"
+                        : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
