@@ -243,6 +243,13 @@ STORAGES = {
     },
 }
 
+# Qdrant Cloud Config
+QDRANT_URL = os.getenv('QDRANT_URL')
+QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
+QDRANT_COLLECTION_NAME = "studytailor_materials"
+QDRANT_VECTOR_SIZE = 1536
+QDRANT_DISTANCE_METRIC = "Cosine"
+
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
 
 REDIS_USE_SSL = REDIS_URL.startswith('rediss://')
