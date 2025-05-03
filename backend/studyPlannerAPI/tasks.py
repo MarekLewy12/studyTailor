@@ -6,6 +6,7 @@ from studyPlanner.services import AIServiceFactory
 from .conversation_context import ConversationContext
 import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
 
 # operacje na plikach
 import fitz
@@ -192,6 +193,31 @@ def process_uploaded_pdf(self, material_id):
 
         # embedding
         print(f"Task ID: {task_id} - [3] Tworzenie embeddingu")
+        embedding_vectors = []
+        if chunks:
+            try:
+                embeddings_model = OpenAIEmbeddings(model="text-embedding-3-small")
+
+                # lista stringów
+                texts_to_embed = [chunk.page_content for chunk in chunks]
+
+                print(f"Task ID: {task_id} - [3.1] Tworzenie embeddingu dla {len(texts_to_embed)} fragmentów")
+                embedding_vectors = embeddings_model.embed_documents(texts_to_embed)
+                print(f"Task ID: {task_id} - [3.2] Tworzenie embeddingu zakończone ({len(embedding_vectors)} wektorów)")
+
+                # embedding vectors to teraz lista liczb zawierająca embeddingi
+
+                # sprawdzenie czy liczba uzyskanych wektorów jest zgodna z liczbą fragmentów
+                if len(embedding_vectors) != len(chunks):
+                    print(f"Task ID: {task_id} - [3.3] Liczba wektorów ({len(embedding_vectors)}) nie zgadza się z liczbą fragmentów ({len(chunks)})")
+                    raise ValueError("Liczba wektorów nie zgadza się z liczbą fragmentów")
+
+            except Exception as embedding_error:
+                print(f"Task ID: {task_id} - Błąd podczas tworzenia embeddingu: {embedding_error}")
+                raise embedding_error
+        else:
+            print(f"Task ID: {task_id} - Brak fragmentów do embeddingu")
+            raise ValueError("Brak fragmentów do embeddingu")
 
         # zapis do bazy wektorowej
         print(f"Task ID: {task_id} - [4] Zapis do bazy wektorowej")
