@@ -64,12 +64,32 @@ class Subject(models.Model):
 
 class Material(models.Model):
     """Materiały do nauki dla przedmiotu"""
+    PROCESSING_STATUS_CHOICES = [
+        ('pending', 'Oczekujący'),
+        ('processing', 'W trakcie przetwarzania'),
+        ('completed', 'Przetworzony'),
+        ('failed', 'Nieudany'),
+    ]
+
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='materials')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='materials/', blank=True, null=True)
     link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # RAG
+    processing_status = models.CharField(
+        max_length=20,
+        choices=PROCESSING_STATUS_CHOICES,
+        default='pending',
+        verbose_name="Status przetwarzania PDF"
+    )
+    error_message = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Komunikat o błędzie"
+    )
 
     def __str__(self):
         return self.title

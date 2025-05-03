@@ -24,7 +24,7 @@ from django.utils import timezone
 from .models import Subject, Material, StudySession, Profile
 from .serializers import SubjectSerializer, MaterialSerializer, StudySessionSerializer, MaterialSubjectSerializer
 
-from .tasks import process_ai_assistant_request
+from .tasks import process_ai_assistant_request, process_uploaded_pdf
 from celery.result import AsyncResult
 
 from django.utils.encoding import force_str
@@ -41,7 +41,9 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token
-from .models import CustomUser
+from .serializers import MaterialSerializer
+from .models import CustomUser, Material
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
@@ -441,7 +443,13 @@ def materials(request, subject_id):
                 print("Serializer valid, fields:", serializer.validated_data)
                 material = serializer.save(subject=subject)
                 print("Material saved successfully, ID:", material.id)
-                return Response(serializer.data, status=201)
+
+                if material.file and material.file.name.lower().endswith('.pdf'):
+                    # Przetwarzanie pliku PDF
+                    task = process_uploaded_pdf.delay(material.id)
+                    print("Task ID:", task.id)
+
+                return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
             else:
                 print("Validation errors:", serializer.errors)
                 return Response(serializer.errors, status=400)
