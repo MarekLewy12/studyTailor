@@ -5,6 +5,7 @@ from .models import Subject, StudySession, Material
 from studyPlanner.services import AIServiceFactory
 from .conversation_context import ConversationContext
 import os
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # operacje na plikach
 import fitz
@@ -145,7 +146,49 @@ def process_uploaded_pdf(self, material_id):
 
         # Dzielenie tekstu na fragmenty
         print(f"Task ID: {task_id} - [2] Dzielenie tekstu na fragmenty")
-        chunks = []
+        chunks = None
+        if extracted_text:
+            try:
+                text_splitter = RecursiveCharacterTextSplitter(  # dzielnik tekstu
+                    separators=["\n\n", "\n",". ", " ", ""],
+                    chunk_size=1000,
+                    chunk_overlap=150,
+                    length_function=len,
+                    is_separator_regex=False,
+                )
+
+                documents = text_splitter.create_documents([extracted_text])  # tworzenie dokumentów z tekstu
+                chunks = documents
+
+                print(f"Task ID: {task_id} - [2.1] Podział tekstu zakończony ({len(chunks)} fragmentów)")
+
+                if chunks:
+                    print(f"Task ID: {task_id} - [2.2] Pierwszy fragment: {chunks[0].page_content[:100]}... ({len(chunks[0].page_content)} znaków)")
+                    print(f"Task ID: {task_id} - [2.3] Dodawanie metadanych do fragmentów")
+                    user_id = material.subject.user.id
+                    subject_id = material.subject.id
+                    material_id_val = material.id
+
+                    for i, chunk in enumerate(chunks):
+                        chunk.metadata.update({
+                            'user_id': user_id,
+                            'subject_id': subject_id,
+                            'material_id': material_id_val,
+                            'chunk_index': i,
+                            'source_file': material.file.name
+                        })
+                    print(f"Task ID: {task_id} - [2.4] Dodano metadane do fragmentów")
+
+                else:
+                    print(f"Task ID: {task_id} - [2.5] Brak fragmentów do przetworzenia")
+                    raise ValueError("Brak fragmentów do przetworzenia")
+
+            except Exception as chunking_error:
+                print(f"Task ID: {task_id} - Błąd podczas dzielenia tekstu na fragmenty: {chunking_error}")
+                raise chunking_error
+        else:
+            print(f"Task ID: {task_id} - Brak tekstu do podziału")
+            raise ValueError("Brak tekstu do podziału")
 
         # embedding
         print(f"Task ID: {task_id} - [3] Tworzenie embeddingu")
