@@ -2,6 +2,13 @@
 
 Cześć! 👋 StudyTailor to aplikacja webowa stworzona z myślą o studentach (szczególnie ZUT!), aby ułatwić organizację nauki i zarządzanie materiałami. Koniec z chaosem - wszystko, czego potrzebujesz, znajdziesz w jednym miejscu!
 
+<p align="center">
+  <img src="docs/screenshots/hero_section.png" width="32%" alt="Sekcja startowa aplikacji" />
+  <img src="docs/screenshots/ai_for_all.png" width="32%" alt="Asystent AI w akcji" />
+  <img src="docs/screenshots/miss_answer.png" width="32%" alt="Ekran 'Nie znam odpowiedzi'" />
+</p>
+
+
 ## Co potrafi StudyTailor?
 
 * **🗓️ Plan Zajęć pod Kontrolą:** Automatycznie pobiera Twój plan zajęć z systemu ZUT.
