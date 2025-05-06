@@ -47,6 +47,7 @@ def initialize_qdrant_client():
         logger.error(f"Błąd podczas łączenia z Qdrant: {settings.QDRANT_URL}")
         raise ConnectionError(f"Błąd podczas łączenia z Qdrant: {e}")
 
+
 def ensure_qdrant_collection():
     """Upewnienie, że kolekcja Qdrant istnieje i ewentualne utworzenie jej"""
     try:
@@ -68,28 +69,78 @@ def ensure_qdrant_collection():
         logger.error("Brak ustawienia QDRANT_DISTANCE_METRIC w settings.py.")
         raise ValueError("Brak ustawienia QDRANT_DISTANCE_METRIC w settings.py")
 
+    collection_exists = False
     try:
         # Sprawdzenie czy kolekcja już istnieje
-        client.get_collection(collection_name)
+        client.get_collection(collection_name=collection_name)
         logger.info(f"Kolekcja {collection_name} już istnieje.")
+        collection_exists = True
     except Exception as e:
-        logger.warning(f"Kolekcja {collection_name} nie istnieje, tworzenie nowej: {e}")
-        try:
-            client.create_collection(
-                collection_name=collection_name,
-                vectors_config=models.VectorParams(
-                    size=vector_size,
-                    distance=distance
-                ),
+        if hasattr(e, 'status_code') and e.status_code == 404:
+            logger.warning(
+                f"Kolekcja '{collection_name}' nie istnieje. Próba utworzenia..."
             )
-            logger.info(f"Kolekcja {collection_name} została pomyślnie utworzona.")
-        except Exception as create_error:
-            error_str = str(create_error).lower()
-            if "already exists" or "exist" in error_str:
-                logger.warning(f"Kolekcja {collection_name} już istnieje, prawdopodobnie utworzył ją inny worker.")
-            else:
-                logger.error(f"Błąd podczas tworzenia kolekcji {collection_name}: {create_error}")
-                raise ConnectionError(f"Nie udało się utworzyć kolekcji Qdrant: {create_error}")
+        elif "not found" in str(e).lower() or "doesn't exist" in str(e).lower():
+            logger.warning(
+                f"Kolekcja '{collection_name}' nie istnieje. Próba utworzenia..."
+            )
+        else:
+            logger.error(f"Nieoczekiwany błąd podczas sprawdzania kolekcji '{collection_name}': {e}")
+            raise ConnectionError(f"Nie udało się sprawdzić statusu kolekcji Qdrant: {e}")
+        if not collection_exists:
+            try:
+                client.create_collection(
+                    collection_name=collection_name,
+                    vectors_config=models.VectorParams(
+                        size=vector_size,
+                        distance=distance
+                    ),
+                )
+                logger.info(f"Kolekcja {collection_name} została pomyślnie utworzona.")
+            except Exception as create_error:
+                error_str = str(create_error).lower()
+                if "already exists" or "exist" in error_str:
+                    logger.warning(f"Kolekcja {collection_name} już istnieje, prawdopodobnie utworzył ją inny worker.")
+                else:
+                    logger.error(f"Błąd podczas tworzenia kolekcji {collection_name}: {create_error}")
+                    raise ConnectionError(f"Nie udało się utworzyć kolekcji Qdrant: {create_error}")
+
+        if collection_exists:
+            fields_to_index = {
+                "metadata.user_id": models.PayloadSchemaType.KEYWORD,
+                "metadata.subject_id": models.PayloadSchemaType.KEYWORD,
+            }
+
+            try:
+                collection_info = client.get_collection(collection_name=collection_name)
+                existing_payload_schema = collection_info.payload_schema if collection_info.payload_schema else {}
+            except Exception as e:
+                logger.error(
+                    f"Nie udało się pobrać informacji o schemacie payloadu dla kolekcji '{collection_name}': {e}")
+                existing_payload_schema = {}
+
+            for field_name, schema_type in fields_to_index.items():
+                # Sprawdzenie czy indeks dla danego pola już istnieje
+                if field_name not in existing_payload_schema:
+                    try:
+                        logger.info(
+                            f"Tworzenie indeksu payloadu dla pola '{field_name}' w kolekcji '{collection_name}'...")
+                        client.create_payload_index(
+                            collection_name=collection_name,
+                            field_name=field_name,
+                            field_schema=schema_type,
+                            wait=True
+                        )
+                        logger.info(f"Indeks payloadu dla pola '{field_name}' został utworzony.")
+                    except Exception as index_error:
+                        if "already exists" in str(index_error).lower():
+                            logger.warning(f"Indeks dla pola '{field_name}' już istnieje (zignorowano błąd tworzenia).")
+                        else:
+                            logger.error(
+                                f"Błąd podczas tworzenia indeksu payloadu dla pola '{field_name}': {index_error}"
+                            )
+                else:
+                    logger.info(f"Indeks payloadu dla pola '{field_name}' już istnieje w schemacie kolekcji.")
 
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
