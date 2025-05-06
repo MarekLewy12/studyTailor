@@ -237,7 +237,7 @@ def process_uploaded_pdf(self, material_id):
             print(f"Task ID: {task_id} - [4.2] Klient Qdrant gotowy")
 
             points_to_upsert = []
-            STUDYTAILOR_NAMESPACE = uuid.UUID('some-namespace-uuid-for-studytailor')
+            STUDYTAILOR_NAMESPACE = uuid.UUID('1ac8522e-8aee-4eb9-995b-f8e5febe35aa')
             for i, chunk in enumerate(chunks):
                 if i >= len(embedding_vectors):
                     print(f"Task ID: {task_id} - Brak wektora dla fragmentu {i}")
