@@ -12,6 +12,8 @@ import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 
+import uuid
+
 # operacje na plikach
 import fitz
 from django.core.files.storage import default_storage
@@ -235,12 +237,14 @@ def process_uploaded_pdf(self, material_id):
             print(f"Task ID: {task_id} - [4.2] Klient Qdrant gotowy")
 
             points_to_upsert = []
+            STUDYTAILOR_NAMESPACE = uuid.UUID('some-namespace-uuid-for-studytailor')
             for i, chunk in enumerate(chunks):
                 if i >= len(embedding_vectors):
                     print(f"Task ID: {task_id} - Brak wektora dla fragmentu {i}")
                     continue
 
-                point_id = f"{material.id}_{i}"  # unikalny identyfikator punktu
+                point_id_name = f"{material.id}_{i}"  # unikalny identyfikator punktu
+                point_id = str(uuid.uuid5(STUDYTAILOR_NAMESPACE, point_id_name))  # generowanie UUID v5
                 vector = embedding_vectors[i]
 
                 payload = {

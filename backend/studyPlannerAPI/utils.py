@@ -17,7 +17,7 @@ def initialize_qdrant_client():
     if _qdrant_client_instance:
         try:
             # sprawdzenie czy zainicjalizowany klient jest poprawny i w ogóle działa
-            _qdrant_client_instance.rest_url
+            _qdrant_client_instance.get_collections()
             logger.debug("Reużywanie istniejącego klienta Qdrant")
             return _qdrant_client_instance
         except Exception as e:
