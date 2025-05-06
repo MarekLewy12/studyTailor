@@ -16,6 +16,8 @@ from qdrant_client import models as qdrant_models
 from langchain_openai import OpenAIEmbeddings
 import logging
 
+from backend.studyPlannerAPI.utils import ensure_qdrant_collection
+
 # Inicjalizacja loggera
 logger = logging.getLogger(__name__)
 
@@ -453,6 +455,8 @@ class AIModelService:
                 ]
             )
             logger.debug(f"[RAG] Filtr wyszukiwania przygotowany: user_id={user_id}, subject_id={subject_id}")
+
+            ensure_qdrant_collection()
 
             search_result = qdrant_client.search(
                 collection_name=settings.QDRANT_COLLECTION_NAME,

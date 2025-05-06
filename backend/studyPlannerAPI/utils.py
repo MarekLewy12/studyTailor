@@ -97,50 +97,51 @@ def ensure_qdrant_collection():
                     ),
                 )
                 logger.info(f"Kolekcja {collection_name} została pomyślnie utworzona.")
+                collection_exists = True
             except Exception as create_error:
                 error_str = str(create_error).lower()
-                if "already exists" or "exist" in error_str:
+                if "already exists" in error_str or "exist" in error_str:
                     logger.warning(f"Kolekcja {collection_name} już istnieje, prawdopodobnie utworzył ją inny worker.")
                 else:
                     logger.error(f"Błąd podczas tworzenia kolekcji {collection_name}: {create_error}")
                     raise ConnectionError(f"Nie udało się utworzyć kolekcji Qdrant: {create_error}")
 
-        if collection_exists:
-            fields_to_index = {
-                "metadata.user_id": models.PayloadSchemaType.KEYWORD,
-                "metadata.subject_id": models.PayloadSchemaType.KEYWORD,
-            }
+    if collection_exists:
+        fields_to_index = {
+            "metadata.user_id": models.PayloadSchemaType.KEYWORD,
+            "metadata.subject_id": models.PayloadSchemaType.KEYWORD,
+        }
 
-            try:
-                collection_info = client.get_collection(collection_name=collection_name)
-                existing_payload_schema = collection_info.payload_schema if collection_info.payload_schema else {}
-            except Exception as e:
-                logger.error(
-                    f"Nie udało się pobrać informacji o schemacie payloadu dla kolekcji '{collection_name}': {e}")
-                existing_payload_schema = {}
+        try:
+            collection_info = client.get_collection(collection_name=collection_name)
+            existing_payload_schema = collection_info.payload_schema if collection_info.payload_schema else {}
+        except Exception as e:
+            logger.error(
+                f"Nie udało się pobrać informacji o schemacie payloadu dla kolekcji '{collection_name}': {e}")
+            existing_payload_schema = {}
 
-            for field_name, schema_type in fields_to_index.items():
-                # Sprawdzenie czy indeks dla danego pola już istnieje
-                if field_name not in existing_payload_schema:
-                    try:
-                        logger.info(
-                            f"Tworzenie indeksu payloadu dla pola '{field_name}' w kolekcji '{collection_name}'...")
-                        client.create_payload_index(
-                            collection_name=collection_name,
-                            field_name=field_name,
-                            field_schema=schema_type,
-                            wait=True
+        for field_name, schema_type in fields_to_index.items():
+            # Sprawdzenie czy indeks dla danego pola już istnieje
+            if field_name not in existing_payload_schema:
+                try:
+                    logger.info(
+                        f"Tworzenie indeksu payloadu dla pola '{field_name}' w kolekcji '{collection_name}'...")
+                    client.create_payload_index(
+                        collection_name=collection_name,
+                        field_name=field_name,
+                        field_schema=schema_type,
+                        wait=True
+                    )
+                    logger.info(f"Indeks payloadu dla pola '{field_name}' został utworzony.")
+                except Exception as index_error:
+                    if "already exists" in str(index_error).lower():
+                        logger.warning(f"Indeks dla pola '{field_name}' już istnieje (zignorowano błąd tworzenia).")
+                    else:
+                        logger.error(
+                            f"Błąd podczas tworzenia indeksu payloadu dla pola '{field_name}': {index_error}"
                         )
-                        logger.info(f"Indeks payloadu dla pola '{field_name}' został utworzony.")
-                    except Exception as index_error:
-                        if "already exists" in str(index_error).lower():
-                            logger.warning(f"Indeks dla pola '{field_name}' już istnieje (zignorowano błąd tworzenia).")
-                        else:
-                            logger.error(
-                                f"Błąd podczas tworzenia indeksu payloadu dla pola '{field_name}': {index_error}"
-                            )
-                else:
-                    logger.info(f"Indeks payloadu dla pola '{field_name}' już istnieje w schemacie kolekcji.")
+            else:
+                logger.info(f"Indeks payloadu dla pola '{field_name}' już istnieje w schemacie kolekcji.")
 
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
