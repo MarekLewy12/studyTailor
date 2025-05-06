@@ -47,7 +47,50 @@ def initialize_qdrant_client():
         logger.error(f"Błąd podczas łączenia z Qdrant: {settings.QDRANT_URL}")
         raise ConnectionError(f"Błąd podczas łączenia z Qdrant: {e}")
 
-# TODO: Upewnienie się, że klient jest poprawny i kolekcja istnieje i posiada poprawne parametry
+def ensure_qdrant_collection():
+    """Upewnienie, że kolekcja Qdrant istnieje i ewentualne utworzenie jej"""
+    try:
+        client = initialize_qdrant_client()
+    except ConnectionError as connection_error:
+        logger.error(f"Błąd podczas inicjalizacji klienta Qdrant: {connection_error}")
+        raise
+
+    collection_name = settings.QDRANT_COLLECTION_NAME
+    vector_size = settings.QDRANT_VECTOR_SIZE
+    distance_metric_str = settings.QDRANT_DISTANCE_METRIC.upper()
+
+    try:
+        distance = models.Distance[distance_metric_str]
+    except KeyError:
+        logger.error(f"Nieznana metryka odległości: {distance_metric_str}")
+        raise ValueError(f"Nieznana metryka odległości: {distance_metric_str}")
+    except AttributeError:
+        logger.error("Brak ustawienia QDRANT_DISTANCE_METRIC w settings.py.")
+        raise ValueError("Brak ustawienia QDRANT_DISTANCE_METRIC w settings.py")
+
+    try:
+        # Sprawdzenie czy kolekcja już istnieje
+        client.get_collection(collection_name)
+        logger.info(f"Kolekcja {collection_name} już istnieje.")
+    except Exception as e:
+        logger.warning(f"Kolekcja {collection_name} nie istnieje, tworzenie nowej: {e}")
+        try:
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config=models.VectorParams(
+                    size=vector_size,
+                    distance=distance
+                ),
+            )
+            logger.info(f"Kolekcja {collection_name} została pomyślnie utworzona.")
+        except Exception as create_error:
+            error_str = str(create_error).lower()
+            if "already exists" or "exist" in error_str:
+                logger.warning(f"Kolekcja {collection_name} już istnieje, prawdopodobnie utworzył ją inny worker.")
+            else:
+                logger.error(f"Błąd podczas tworzenia kolekcji {collection_name}: {create_error}")
+                raise ConnectionError(f"Nie udało się utworzyć kolekcji Qdrant: {create_error}")
+
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):

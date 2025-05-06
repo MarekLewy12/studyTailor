@@ -2,6 +2,10 @@ from celery import shared_task
 from celery.exceptions import Ignore
 from django.utils import timezone
 from .models import Subject, StudySession, Material
+from .utils import ensure_qdrant_collection, initialize_qdrant_client
+from qdrant_client import models
+from qdrant_client.http.models import PointStruct
+from django.conf import settings
 from studyPlanner.services import AIServiceFactory
 from .conversation_context import ConversationContext
 import os
@@ -33,6 +37,8 @@ def process_ai_assistant_request(self, subject_id, user_id, question, model_name
         result = ai_service.generate_study_assistant_response(
             subject_name=subject.name,
             question=question,
+            user_id=user_id,
+            subject_id=subject_id,
             subject_type=subject.lesson_form,
             conversation_history=conversation_history
         )
@@ -41,7 +47,7 @@ def process_ai_assistant_request(self, subject_id, user_id, question, model_name
             response = result['response']
             elapsed_time = result['elapsed_time']
         else:
-            response = result
+            response = str(result)
             elapsed_time = None
 
         # Zapisanie sesji nauki
@@ -192,7 +198,7 @@ def process_uploaded_pdf(self, material_id):
             raise ValueError("Brak tekstu do podziału")
 
         # embedding
-        print(f"Task ID: {task_id} - [3] Tworzenie embeddingu")
+        print(f"Task ID: {task_id} - [3] Tworzenie embeddingów")
         embedding_vectors = []
         if chunks:
             try:
@@ -220,8 +226,61 @@ def process_uploaded_pdf(self, material_id):
             raise ValueError("Brak fragmentów do embeddingu")
 
         # zapis do bazy wektorowej
-        print(f"Task ID: {task_id} - [4] Zapis do bazy wektorowej")
+        print(f"Task ID: {task_id} - [4] Zapis do bazy wektorowej (Qdrant Cloud)")
+        try:
+            ensure_qdrant_collection()  # upewnienie się, że kolekcja istnieje
+            print(f"Task ID: {task_id} - [4.1] Kolekcja gotowa")
 
+            qdrant_client = initialize_qdrant_client()  # inicjalizacja klienta Qdrant
+            print(f"Task ID: {task_id} - [4.2] Klient Qdrant gotowy")
+
+            points_to_upsert = []
+            for i, chunk in enumerate(chunks):
+                if i >= len(embedding_vectors):
+                    print(f"Task ID: {task_id} - Brak wektora dla fragmentu {i}")
+                    continue
+
+                point_id = f"{material.id}_{i}"  # unikalny identyfikator punktu
+                vector = embedding_vectors[i]
+
+                payload = {
+                    "text":chunk.page_content,
+                    "metadata": {
+                        "user_id": str(chunk.metadata.get('user_id', '')),
+                        "subject_id": str(chunk.metadata.get('subject_id', '')),
+                        "material_id": str(chunk.metadata.get('material_id', '')),
+                        "chunk_index": int(chunk.metadata.get('chunk_index', -1)),
+                        "source_file": str(chunk.metadata.get('source_file', ''))
+                    }
+                }
+
+                points_to_upsert.append(
+                    PointStruct(
+                        id=point_id,
+                        vector=vector,
+                        payload=payload
+                    )
+                )
+            print(f"Task ID: {task_id} - [4.3] Przygotowano {len(points_to_upsert)} punktów do zapisu.")
+
+            # Wstawianie punktów do kolekcji
+            if points_to_upsert:
+                qdrant_client.upsert(
+                    collection_name=settings.QDRANT_COLLECTION_NAME,
+                    points=points_to_upsert,
+                    wait=True
+                )
+                print(f"Task ID: {task_id} - [4.4] Wstawiono {len(points_to_upsert)} punktów do kolekcji {settings.QDRANT_COLLECTION_NAME}")
+            else:
+                print(f"Task ID: {task_id} - [4.5] Brak punktów do wstawienia")
+                raise ValueError("Brak punktów do wstawienia")
+        except ConnectionError as connection_error:
+            print(f"Task ID: {task_id} - Błąd połączenia z Qdrant: {connection_error}")
+            raise connection_error
+        except Exception as db_error:
+            qdrant_error_details = getattr(db_error, 'response', str(db_error))
+            print(f"Task ID: {task_id} - Błąd podczas zapisu do bazy wektorowej: {qdrant_error_details}")
+            raise db_error
 
         # aktualizacja statusu materiału
         material.processing_status = 'completed'

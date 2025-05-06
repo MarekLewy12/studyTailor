@@ -11,6 +11,13 @@ from tabulate import tabulate
 import json
 import os
 from django.conf import settings
+from studyPlannerAPI.utils import initialize_qdrant_client
+from qdrant_client import models as qdrant_models
+from langchain_openai import OpenAIEmbeddings
+import logging
+
+# Inicjalizacja loggera
+logger = logging.getLogger(__name__)
 
 
 class StudyPlanner:
@@ -411,16 +418,63 @@ class AIModelService:
                 "elapsed_time": 0
             }
 
-    def generate_study_assistant_response(self, subject_name, question, subject_type=None,
+    def generate_study_assistant_response(self, subject_name, question, user_id, subject_id, subject_type=None,
                                           conversation_history=None):
         """
-        Wspólna implementacja generowania odpowiedzi asystenta nauki.
+        Wspólna implementacja generowania odpowiedzi asystenta nauki, wersja RAG
         """
         subject_context = f"Przedmiotu: '{subject_name}'"
         if subject_type:
             subject_context += f" ({subject_type})"
 
-        system_prompt = f"""
+        retrieved_context = ""
+
+        try:
+            logger.info(f"[RAG] Rozpoczęcie wyszukiwania kontekstu dla '{subject_name}' oraz user_id: {user_id}")
+            embeddings_model = OpenAIEmbeddings(model="text-embedding-3-small")
+            logger.debug(f"[RAG] Inicjalizacja modelu osadzania: {embeddings_model}")
+
+            question_vector = embeddings_model.embed_query(question)
+            logger.debug(f"[RAG] Osadzenie pytania: {question_vector}")
+
+            qdrant_client = initialize_qdrant_client()
+            logger.debug(f"[RAG] Inicjalizacja klienta Qdrant: {qdrant_client}")
+
+            search_filter = qdrant_models.Filter(
+                must=[
+                    qdrant_models.FieldCondition(
+                        key="metadata.user_id",
+                        match=qdrant_models.MatchValue(value=str(user_id))
+                    ),
+                    qdrant_models.FieldCondition(
+                        key="metadata.subject_id",
+                        match=qdrant_models.MatchValue(value=str(subject_id))
+                    )
+                ]
+            )
+            logger.debug(f"[RAG] Filtr wyszukiwania przygotowany: user_id={user_id}, subject_id={subject_id}")
+
+            search_result = qdrant_client.search(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                query_vector=question_vector,
+                query_filter=search_filter,
+                limit=3,
+            )
+            logger.info(f"[RAG] Wyszukiwanie zakończone, znaleziono {len(search_result)} wyników.")
+
+            if search_result:
+                retrieved_context = "\n".join(
+                    [doc.payload["text"] for doc in search_result]
+                )
+                if retrieved_context:
+                    logger.debug(f"[RAG] Kontekst pobrany: {retrieved_context}")
+                else:
+                    logger.warning(f"[RAG] Nie znaleziono pasującego kontekstu.")
+        except Exception as e:
+            logger.error(f"[RAG] Błąd podczas wyszukiwania wektorowego: {str(e)}")
+            retrieved_context = ""
+
+        system_prompt_base = f"""
         Jesteś asystentem nauki specjalizującym się w {subject_context}. 
         Twoje zadanie to pomagać studentom i uczniom w zrozumieniu materiału, wyjaśniać trudne koncepcje 
         i wspierać proces nauki. Udzielaj rzeczowych, dokładnych odpowiedzi opartych na faktach.
@@ -440,6 +494,22 @@ class AIModelService:
 
         Odpowiadaj w języku polskim.
         """
+
+        if retrieved_context:
+            system_prompt = f"""
+            {system_prompt_base}
+            
+            Odpowiadaj na pytanie użytkownika TYLKO na podstawie poniższego kontekstu pochodzącego z jego materiałów:
+            --- KONTEKST ---
+            {retrieved_context}
+            --- KONIEC KONTEKSTU ---
+            """
+        else:
+            system_prompt = f"""
+            {system_prompt_base}
+            
+            Nie znaleziono specyficznych informacji w materiałach użytkownika na ten temat. Odpowiedz na pytanie najlepiej jak potrafisz, opierając się na swojej ogólnej wiedzy.
+            """
 
         prompt = f"Jako student uczący się {subject_context}, mam następujące pytanie: {question}"
 
