@@ -112,8 +112,6 @@ def process_uploaded_pdf(self, material_id):
         material.save(update_fields=['processing_status', 'error_message'])  # aktualizacja statusu w bazie danych
         print(f"Task ID: {task_id} - Rozpoczęcie przetwarzania pliku PDF o ID: {material.id}")
 
-        # TODO: Przetwarzanie pliku PDF
-
         # Ekstrakcja tekstu
         print(f"Task ID: {task_id} - [1] Ekstrakcja tekstu z pliku PDF")
         extracted_text = None
@@ -151,7 +149,6 @@ def process_uploaded_pdf(self, material_id):
                     print(f"Task ID: {task_id} - Zamknięcie pliku PDF")
                 except Exception as close_error:
                     print(f"Task ID: {task_id} - Błąd podczas zamykania pliku PDF: {close_error}")
-
 
         # Dzielenie tekstu na fragmenty
         print(f"Task ID: {task_id} - [2] Dzielenie tekstu na fragmenty")
