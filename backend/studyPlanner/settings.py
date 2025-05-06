@@ -29,7 +29,7 @@ FRONTEND_LOGIN_URL = "https://studytailor.netlify.app/auth"
 SECRET_KEY = "django-insecure-%z-2jz8hqw=k!q8tbrudw_72+x2_47d0t1wvno(ep27)ch07z$"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
