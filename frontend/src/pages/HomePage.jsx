@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
 import HeroSection from "../components/HeroSection";
 import FeaturesSection from "../components/FeatureSection.jsx";
 import AIAssistantDemo from "../components/AIAssistantDemo.jsx";
@@ -9,6 +9,8 @@ import CallToAction from "../components/CallToAction.jsx";
 import UpdateNotificationButton from "../components/UpdateNotificationButton.jsx";
 
 const HomePage = () => {
+  const [audience, setAudience] = useState(null);
+
   const featuresRef = useRef(null);
   const aiToolsRef = useRef(null);
 
@@ -25,17 +27,7 @@ const HomePage = () => {
 
   return (
     <div>
-      {/* Hero (zdjęcie z przyciskiem) */}
-      <HeroSection scrollToFeatures={scrollToFeatures} />
-
-      {/* Features (funkcje naszej aplikacji) */}
-      <div id="features" ref={featuresRef}>
-        <FeaturesSection />
-      </div>
-      {/* AI Tools */}
-      <AiToolsSection />
-
-      <UpdateNotificationButton />
+      <HeroSection />
     </div>
   );
 };
