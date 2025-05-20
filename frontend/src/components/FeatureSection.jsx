@@ -114,16 +114,8 @@ const FeaturesSection = forwardRef((props, ref) => {
             viewport={{ once: true }}
             className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl overflow-hidden shadow-xl relative"
           >
-            <p>TODO</p>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
-              <div className="p-6 text-white">
-                <h4 className="text-xl font-bold mb-2">Intuicyjny interfejs</h4>
-                <p className="text-sm text-white/80">
-                  Zaprojektowany z myślą o studencie, aby zapewnić maksymalną
-                  produktywność
-                </p>
-              </div>
-            </div>
+            <p>Tutaj pokażemy nagrany filmik</p>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end"></div>
           </motion.div>
         </div>
       </div>
