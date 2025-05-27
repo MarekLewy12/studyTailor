@@ -127,3 +127,34 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"Profil użytkownika: {self.user.username}"
+    
+# QUIZY
+class Quiz(models.Model):
+    """Model pojedynczego quizu"""
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='quizzes')
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    generation_timelapse = models.DurationField(null=True, blank=True, verbose_name="Czas generowania quizu")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='quizzes')
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Quiz: {self.title} ({self.subject.name}) - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class QuizQuestion(models.Model):
+    """Model pytania w quizie"""
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    correct_answer = models.TextField()
+    distractors = models.JSONField(default=list)
+    explanation = models.TextField(blank=True, verbose_name="Wyjaśnienie odpowiedzi")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Pytanie: {self.question_text[:50]}..."
