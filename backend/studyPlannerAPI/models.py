@@ -3,6 +3,12 @@ from django.db import models
 from django.conf import settings
 
 class CustomUserManager(UserManager):
+    """
+    @class CustomUserManager
+    @brief Menedżer użytkowników niestandardowych.
+    
+    Klasa rozszerzająca domyślnego UserManagera Django, umożliwiająca tworzenie użytkowników z dodatkowymi polami oraz logiką biznesową.
+    """
     def create_superuser(
         self, username, email = ..., password = ..., **extra_fields
     ):
@@ -21,6 +27,12 @@ class CustomUserManager(UserManager):
 
 
 class ModelRequest(models.Model):
+    """
+    @class ModelRequest
+    @brief Model zapytania do modelu AI.
+    
+    Przechowuje informacje o zapytaniach do modeli AI, w tym prompt, odpowiedź, temperaturę i znacznik czasu.
+    """
     timestamp = models.DateTimeField(auto_now_add=True)
     model = models.TextField()
     temperature = models.FloatField()
@@ -32,6 +44,12 @@ class ModelRequest(models.Model):
 
 # Model studencki z numerem albumu
 class CustomUser(AbstractUser):
+    """
+    @class CustomUser
+    @brief Rozszerzony model użytkownika.
+    
+    Dodaje pole numeru albumu do domyślnego użytkownika Django. Pozwala na identyfikację studentów po numerze albumu.
+    """
     album_number = models.CharField(max_length=5, unique=True, null=True, blank=True)
 
     # Podmiana domyślnego managera na CustomUserManager
@@ -46,7 +64,12 @@ class CustomUser(AbstractUser):
 
 
 class Subject(models.Model):
-    """Model przedmiotu z planu zajęć"""
+    """
+    @class Subject
+    @brief Model przedmiotu z planu zajęć.
+    
+    Reprezentuje pojedynczy przedmiot przypisany do użytkownika, wraz z informacjami o formie zajęć, czasie trwania i statusie opanowania materiału.
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subjects')
     name = models.CharField(max_length=200)
     lesson_form = models.CharField(max_length=100)  # np. wykład, laboratorium
@@ -63,7 +86,12 @@ class Subject(models.Model):
 
 
 class Material(models.Model):
-    """Materiały do nauki dla przedmiotu"""
+    """
+    @class Material
+    @brief Materiały do nauki dla przedmiotu.
+    
+    Przechowuje pliki, linki i opisy materiałów edukacyjnych powiązanych z przedmiotem. Obsługuje status przetwarzania plików PDF oraz komunikaty o błędach.
+    """
     PROCESSING_STATUS_CHOICES = [
         ('pending', 'Oczekujący'),
         ('processing', 'W trakcie przetwarzania'),
@@ -96,7 +124,12 @@ class Material(models.Model):
 
 
 class StudySession(models.Model):
-    """Historia sesji nauki z AI dla przedmiotu"""
+    """
+    @class StudySession
+    @brief Historia sesji nauki z AI dla przedmiotu.
+    
+    Zawiera zapis pytań i odpowiedzi z sesji nauki, powiązanych z użytkownikiem i przedmiotem. Pozwala śledzić czas trwania i typ wiadomości.
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='study_sessions')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='study_sessions')
     questions = models.TextField()
@@ -121,6 +154,12 @@ class StudySession(models.Model):
 
 
 class Profile(models.Model):
+    """
+    @class Profile
+    @brief Profil użytkownika.
+    
+    Przechowuje dodatkowe informacje o użytkowniku, takie jak data ostatniej aktualizacji planu zajęć.
+    """
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     last_schedule_update = models.DateTimeField(null=True, blank=True)
 
@@ -130,7 +169,12 @@ class Profile(models.Model):
     
 # QUIZY
 class Quiz(models.Model):
-    """Model pojedynczego quizu"""
+    """
+    @class Quiz
+    @brief Model pojedynczego quizu.
+    
+    Reprezentuje quiz powiązany z przedmiotem i użytkownikiem, przechowuje czas generowania oraz datę utworzenia.
+    """
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='quizzes')
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -145,7 +189,12 @@ class Quiz(models.Model):
 
 
 class QuizQuestion(models.Model):
-    """Model pytania w quizie"""
+    """
+    @class QuizQuestion
+    @brief Model pytania w quizie.
+    
+    Przechowuje treść pytania, poprawną odpowiedź, dystraktory oraz wyjaśnienie odpowiedzi w ramach quizu.
+    """
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
     correct_answer = models.TextField()

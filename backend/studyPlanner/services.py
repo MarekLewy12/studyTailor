@@ -23,6 +23,14 @@ logger = logging.getLogger(__name__)
 
 
 class StudyPlanner:
+    """
+    @class StudyPlanner
+    @brief Główna klasa do zarządzania planowaniem nauki.
+    
+    Odpowiada za pobieranie planu zajęć, generowanie harmonogramu nauki z użyciem AI, wyświetlanie przedmiotów oraz preferencji użytkownika.
+    Integruje się z OpenAI oraz obsługuje preferencje użytkownika i przetwarzanie danych wejściowych.
+    """
+
     def __init__(self, model="gpt-4o", temperature=0.5):
         """
         Inicjalizacja z kluczem API OpenAI.
@@ -357,7 +365,12 @@ class StudyPlanner:
 
 
 class AIModelService:
-    """Klasa abstrakcyjna definiująca interfejs dla serwisów AI, Deepseek oraz GPT4o"""
+    """
+    @class AIModelService
+    @brief Abstrakcyjna klasa bazowa dla serwisów AI.
+    
+    Definiuje interfejs dla usług AI, takich jak Deepseek oraz GPT-4o. Pozwala na generowanie odpowiedzi oraz obsługę kontekstu RAG.
+    """
 
     def __init__(self, api_key=None):
         self.api_key = api_key or self._get_default_api_key()
@@ -494,7 +507,7 @@ class AIModelService:
         Formatuj wzory matematyczne używając składni LaTeX:
         - Dla wzorów inline użyj $wzór$
         - Dla wzorów w osobnej linii użyj $$wzór$$
-        Pisz zwięźnie i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
+        Pisz zwięźle i strukturalnie, dzieląc dłuższe wyjaśnienia na akapity.
 
         Odpowiadaj w języku polskim.
         """
@@ -522,7 +535,10 @@ class AIModelService:
 
 class DeepseekAIService(AIModelService):
     """
-    Deepseek-chat
+    @class DeepseekAIService
+    @brief Serwis integrujący model Deepseek AI.
+    
+    Implementuje metody inicjalizacji klienta oraz generowania odpowiedzi dla modelu Deepseek.
     """
     def _get_default_api_key(self):
         return os.getenv('DEEPSEEK_API_KEY')
@@ -539,7 +555,10 @@ class DeepseekAIService(AIModelService):
 
 class GPT4oService(AIModelService):
     """
-    GPT-4o
+    @class GPT4oService
+    @brief Serwis integrujący model GPT-4o.
+    
+    Implementuje metody inicjalizacji klienta oraz generowania odpowiedzi dla modelu GPT-4o.
     """
 
     def _get_default_api_key(self):
@@ -554,7 +573,10 @@ class GPT4oService(AIModelService):
 
 class AIServiceFactory:
     """
-    Fabryka tworząca odpowiedni serwis AI na podstawie wybranego modelu.
+    @class AIServiceFactory
+    @brief Fabryka serwisów AI.
+    
+    Tworzy instancje odpowiednich serwisów AI na podstawie wybranego modelu (Deepseek, GPT-4o).
     """
 
     @staticmethod

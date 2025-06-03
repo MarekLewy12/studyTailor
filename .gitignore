@@ -178,4 +178,6 @@ pyrightconfig.json
 
 tests
 
+docs_doxygen/html/
+
 # End of https://www.toptal.com/developers/gitignore/api/python
