@@ -107,13 +107,13 @@ const AuthPage = () => {
       if (!valid) {
         // Numer albumu jest niepoprawny
         setAlbumWarning(
-          response.data.message || "Ten numer albumu jest nieprawidłowy",
+          response.data.message || "Ten numer albumu jest nieprawidłowy"
         );
         setAlbumConfirmed(false);
       } else if (exists) {
         // Numer albumu jest poprawny, ale użytkownik już istnieje
         setAlbumWarning(
-          "Użytkownik o tym numerze albumu już istnieje. Czy chcesz się zalogować?",
+          "Użytkownik o tym numerze albumu już istnieje. Czy chcesz się zalogować?"
         );
         setAlbumConfirmed(false);
       } else {
@@ -216,7 +216,7 @@ const AuthPage = () => {
       } else {
         // Zamiast przechodzić do logowania, pokazujemy komunikat o wysłaniu emaila
         setSuccessMessage(
-          `Na adres ${formData.email} wysłaliśmy link aktywacyjny. Proszę sprawdzić pocztę i kliknąć link, aby aktywować konto.`,
+          `Na adres ${formData.email} wysłaliśmy link aktywacyjny. Proszę sprawdzić pocztę i kliknąć link, aby aktywować konto.`
         );
         // Nie przełączamy automatycznie na widok logowania -> zamiast tego dajemy użytkownikowi możliwość przejścia
       }
@@ -225,7 +225,7 @@ const AuthPage = () => {
       setError(
         isLoginView
           ? "Nie udało się zalogować. Sprawdź dane i spróbuj ponownie."
-          : "Nie udało się utworzyć konta. Spróbuj ponownie później.",
+          : "Nie udało się utworzyć konta. Spróbuj ponownie później."
       );
     } finally {
       setIsLoading(false);
@@ -254,17 +254,17 @@ const AuthPage = () => {
       if (status === "success") {
         addNotification(
           "Konto zostało aktywowane pomyślnie. Możesz się teraz zalogować.",
-          "success",
+          "success"
         );
       } else if (status === "invalid") {
         addNotification(
           "Link aktywacyjny jest nieprawidłowy lub wygasł. Proszę spróbować ponownie.",
-          "error",
+          "error"
         );
       } else if (status === "already_active") {
         addNotification(
           "Konto zostało już wcześniej aktywowane. Możesz się na spokojnie zalogować.",
-          "info",
+          "info"
         );
       }
     }
@@ -318,7 +318,7 @@ const AuthPage = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: isLoginView ? 20 : -20 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl border-4 border-indigo-200 dark:border-indigo-800"
+              className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl border-4 border-indigo-200 dark:border-indigo-800 min-h-[830px]"
             >
               {/* Logo i nagłówek */}
               <div className="text-center mb-8">

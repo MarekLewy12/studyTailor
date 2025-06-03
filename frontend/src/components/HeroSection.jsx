@@ -79,7 +79,7 @@ const HeroSection = ({ scrollToFeatures }) => {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <Link
-              to="/register"
+              to="/auth"
               className="px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
               text-white text-lg font-semibold transition-all shadow-lg hover:shadow-indigo-500/30 hover:shadow-xl flex items-center justify-center transform hover:scale-105"
             >
@@ -112,7 +112,7 @@ const HeroSection = ({ scrollToFeatures }) => {
                 }`}
             >
               <FaUserGraduate className="text-2xl" />
-              <span className="text-lg font-medium">Jestem studentem</span>
+              <span className="text-lg font-medium">Jestem studentem ZUT</span>
             </button>
 
             <button
