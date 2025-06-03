@@ -20,6 +20,11 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError("Proszę podać poprawny adres email uczelni (@student.zut.edu.pl)")
         return value
 
+# Serializator do logowania użytkownika (do Swaggera)
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(max_length=128, write_only=True)
+
 # Serializator, opisujący zwracane dane w Response przy rejestracji użytkownika
 class TokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()

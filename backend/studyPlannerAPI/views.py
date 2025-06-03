@@ -10,7 +10,12 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from studyPlannerAPI.models import ModelRequest, CustomUser
-from studyPlannerAPI.serializers import ModelRequestSerializer, RegisterSerializer, TokenSerializer
+from studyPlannerAPI.serializers import (
+    ModelRequestSerializer,
+    RegisterSerializer,
+    LoginSerializer,
+    TokenSerializer,
+)
 from studyPlannerAPI.conversation_context import ConversationContext
 
 from studyPlanner.services import StudyPlanner, DeepseekAIService
@@ -202,6 +207,8 @@ def activate_account(request, uidb64, token):
 
 
 # Logowanie użytkownika
+@swagger_auto_schema(method='post', request_body=LoginSerializer,
+                     responses={200: TokenSerializer()})
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get('username')
