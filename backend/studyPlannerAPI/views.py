@@ -301,15 +301,34 @@ def get_subjects(request):
                     preserved_ids = []
 
                     for item in schedule_data:
+                        existing_subjects = Subject.objects.filter(
+                        user=user,
+                        name=item['subject'],
+                        lesson_form=item['lesson_form'],
+                        start_datetime=item['start_datetime']
+                    )
+
+                        duplicate_count = existing_subjects.count()
+                        print(f"Znaleziono {duplicate_count} rekordów dla przedmiotu: {item['subject']}")
+
+                        # jeśli są duplikaty, sprzątanie
+                        if duplicate_count > 1:
+                            subjects_to_delete = existing_subjects.order_by('id')[:-1]  # Wszystkie oprócz ostatniego
+                            deleted_count = subjects_to_delete.count()
+
+                            print(f"Usunięto {deleted_count} duplikatów dla przedmiotu: {item['subject']}")
+                            subjects_to_delete.delete()
+                    
                         subject, created = Subject.objects.update_or_create(
-                            user=user,
-                            name=item['subject'],
-                            lesson_form=item['lesson_form'],
-                            start_datetime=item['start_datetime'],
-                            defaults={
-                                'end_datetime': item['end_datetime']
-                            }
-                        )
+                        user=user,
+                        name=item['subject'],
+                        lesson_form=item['lesson_form'],
+                        start_datetime=item['start_datetime'],
+                        defaults={'end_datetime': item['end_datetime']}
+                    )
+
+                        action = "Utworzono" if created else "Zaktualizowano istniejący"
+                        print(f"{action} przedmiot: {item['subject']}")
                         preserved_ids.append(subject.id)
 
                     if preserved_ids:
