@@ -234,28 +234,28 @@ def login_view(request):
 def get_subjects(request):
     try:
         user = request.user
+        print(f"[DEBUG] get_subjects wywołane dla użytkownika: {user.username} (ID: {user.id})")
         force_refresh = request.query_params.get('refresh', 'false').lower() == 'true'
+        print(f"[DEBUG] force_refresh: {force_refresh}")
 
         has_subjects = Subject.objects.filter(user=user).exists()
+        print(f"[DEBUG] has_subjects: {has_subjects}")
 
         last_update = None
         profile = None
 
         try:
-            profile = user.profile
-            if hasattr(user, 'profile') and user.profile.last_schedule_update:
+            # Optymalizujemy zapytanie używając select_related dla profilu
+            user_with_profile = CustomUser.objects.select_related('profile').get(id=user.id)
+            profile = user_with_profile.profile
+            if profile and profile.last_schedule_update:
                 last_update = profile.last_schedule_update
-                if not isinstance(last_update, datetime):
-                    try:
-                        # Próba konwersji z ISO formatu jeśli to string
-                        if isinstance(last_update, str):
-                            last_update = datetime.fromisoformat(last_update)
-                        else:
-                            last_update = None
-                    except ValueError:
-                        last_update = None
+                # Zapewniamy, że last_update jest timezone-aware datetime
+                if last_update and not isinstance(last_update, datetime):
+                    print(f"[WARNING] last_update ma nieprawidłowy typ: {type(last_update)}")
+                    last_update = None
 
-        except CustomUser.profile.RelatedObjectDoesNotExist:
+        except Profile.DoesNotExist:
             profile = None
             print(f"Nie znaleziono profilu użytkownika: {user.username}")
         except Exception as e:
@@ -264,15 +264,10 @@ def get_subjects(request):
 
         needs_update = False  # Domyślnie nie aktualizuj
         if last_update and isinstance(last_update, datetime):
-            try:
-                # Skrócenie cache do 12 godzin dla częstszych aktualizacji
-                time_since_update = timezone.now() - last_update
-                needs_update = (time_since_update > timedelta(hours=12))
-                print(f"[DEBUG] Ostatnia aktualizacja: {last_update}, czas od aktualizacji: {time_since_update}, wymaga aktualizacji: {needs_update}")
-            except TypeError as e:
-                print(
-                    f"Błąd podczas porównywania dat: {e}. last_update={last_update}, typ={type(last_update)}")
-                needs_update = True
+            # Skrócenie cache do 12 godzin dla częstszych aktualizacji
+            time_since_update = timezone.now() - last_update
+            needs_update = (time_since_update > timedelta(hours=12))
+            print(f"[DEBUG] Ostatnia aktualizacja: {last_update}, czas od aktualizacji: {time_since_update}, wymaga aktualizacji: {needs_update}")
         else:
             print(f"[DEBUG] Brak ostatniej aktualizacji dla użytkownika {user.username}")
             needs_update = True
@@ -284,7 +279,17 @@ def get_subjects(request):
             try:
                 print(f"Aktualizacja planu zajęć dla użytkownika: {user.username}...")
                 planner = StudyPlanner()
-                schedule_data = planner.get_schedule(user.album_number)
+                schedule_data = None
+                
+                try:
+                    schedule_data = planner.get_schedule(user.album_number)
+                    print(f"[DEBUG] Pomyślnie pobrano dane z API uniwersytetu")
+                except ConnectionError as api_error:
+                    print(f"[ERROR] Błąd połączenia z API uniwersytetu: {api_error}")
+                    schedule_data = None
+                except Exception as api_error:
+                    print(f"[ERROR] Nieoczekiwany błąd API uniwersytetu: {api_error}")
+                    schedule_data = None
 
                 if schedule_data:
                     print(f"[DEBUG] Pobrano {len(schedule_data)} przedmiotów z API uniwersytetu")
@@ -331,13 +336,13 @@ def get_subjects(request):
 
         # Parametr all=true zwraca wszystkie przedmioty, bez tego tylko przyszłe
         show_all = request.query_params.get('all', 'false').lower() == 'true'
+        print(f"[DEBUG] show_all: {show_all}")
         
         if show_all:
             subjects = Subject.objects.filter(user=user).order_by('start_datetime')
             print(f"[DEBUG] Zwracam wszystkie {subjects.count()} przedmiotów (parametr all=true)")
         else:
             # Filtruj tylko przedmioty z dzisiaj i w przyszłości
-            from django.utils import timezone
             today = timezone.now().date()
             subjects = Subject.objects.filter(
                 user=user, 
@@ -361,14 +366,16 @@ def get_subjects(request):
         else:
             last_update_iso = timezone.now().isoformat()
 
-        return Response({
+        response_data = {
             'data': serializer.data,
             'last_update': last_update_iso,
             'refreshed': needs_update,
             'empty_response': len(subjects) == 0,
             'show_all': show_all,
             'total_subjects': subjects.count()
-        })
+        }
+        print(f"[DEBUG] Zwracam response z {len(serializer.data)} przedmiotami")
+        return Response(response_data)
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
