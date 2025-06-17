@@ -365,14 +365,17 @@ def get_subjects(request):
             try:
                 if hasattr(final_last_update, 'isoformat'):
                     last_update_iso = final_last_update.isoformat()
+                    print(f"[DEBUG] Pomyślnie zserializowano last_update_iso: {last_update_iso}")
                 elif isinstance(final_last_update, str):
                     last_update_iso = final_last_update
                 else:
                     last_update_iso = str(final_last_update)
-            except Exception:
-                last_update_iso = timezone.now().isoformat()
+            except Exception as e:
+                print(f"[ERROR] Błąd serializacji final_last_update: {e}")
+                last_update_iso = None
         else:
-            last_update_iso = timezone.now().isoformat()
+            print(f"[DEBUG] Brak final_last_update - nie ustawiam daty ostatniej aktualizacji")
+            last_update_iso = None
 
         response_data = {
             'data': serializer.data,
