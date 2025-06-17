@@ -326,6 +326,8 @@ def get_subjects(request):
 
                 profile.last_schedule_update = timezone.now()
                 profile.save()
+                # Odśwież profil z bazy danych po zapisie
+                profile.refresh_from_db()
                 last_update = profile.last_schedule_update
                 print(f"Zaktualizowano profil użytkownika: {user.username}, last_update={last_update}")
 
@@ -351,16 +353,22 @@ def get_subjects(request):
             print(f"[DEBUG] Zwracam {subjects.count()} przyszłych przedmiotów (od {today})")
         serializer = SubjectSerializer(subjects, many=True)
 
+        # Zawsze pobierz najbardziej aktualną wartość last_schedule_update z profilu
+        final_last_update = None
+        if profile and profile.last_schedule_update:
+            final_last_update = profile.last_schedule_update
+            print(f"[DEBUG] final_last_update z profilu: {final_last_update}")
+        
         # Bezpieczna serializacja last_update
         last_update_iso = None
-        if last_update:
+        if final_last_update:
             try:
-                if hasattr(last_update, 'isoformat'):
-                    last_update_iso = last_update.isoformat()
-                elif isinstance(last_update, str):
-                    last_update_iso = last_update
+                if hasattr(final_last_update, 'isoformat'):
+                    last_update_iso = final_last_update.isoformat()
+                elif isinstance(final_last_update, str):
+                    last_update_iso = final_last_update
                 else:
-                    last_update_iso = str(last_update)
+                    last_update_iso = str(final_last_update)
             except Exception:
                 last_update_iso = timezone.now().isoformat()
         else:
