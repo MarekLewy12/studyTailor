@@ -132,8 +132,16 @@ const DashboardPage = () => {
     }
   };
 
-  // Filtrowanie wykładów
+  // Filtrowanie wykładów i przedmiotów z przeszłości
   const filteredSubjects = subjects.filter((subject) => {
+    const subjectDate = new Date(subject.start_datetime);
+    const now = new Date();
+    
+    // Filtruj przedmioty z przeszłości (starsze niż dzisiaj)
+    if (subjectDate < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
+      return false;
+    }
+
     if (!showLectures && subject.lesson_form.toLowerCase() === "wykład") {
       return false;
     }
@@ -145,8 +153,6 @@ const DashboardPage = () => {
 
       const dayAfterTomorrow = new Date(tomorrow);
       dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
-
-      const subjectDate = new Date(subject.start_datetime);
 
       return subjectDate >= tomorrow && subjectDate < dayAfterTomorrow;
     }
@@ -379,10 +385,17 @@ const DashboardPage = () => {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 lg:col-span-3 border-4 border-indigo-200 dark:border-indigo-800"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 flex items-center">
-                  <FaBook className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
-                  Najbliższe zajęcia
-                </h2>
+                <div>
+                  <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-200 flex items-center">
+                    <FaBook className="mr-2 text-indigo-600 dark:text-indigo-400" />{" "}
+                    Najbliższe zajęcia
+                  </h2>
+                  {filteredSubjects.length > 0 && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Pokazuję {filteredSubjects.length} zajęć od dzisiaj ({new Date().toLocaleDateString("pl-PL")})
+                    </p>
+                  )}
+                </div>
                 <div className="flex items-center">
                   {lastUpdate && (
                     <span className="text-sm text-gray-500 dark:text-gray-300 mr-2">
