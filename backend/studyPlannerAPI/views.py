@@ -313,7 +313,8 @@ def get_subjects(request):
 
                         # jeśli są duplikaty, sprzątanie
                         if duplicate_count > 1:
-                            subjects_to_delete = existing_subjects.order_by('id')[:-1]  # Wszystkie oprócz ostatniego
+                            latest_subject_id = existing_subjects.order_by('-id').first().id
+                            subjects_to_delete = existing_subjects.exclude(id=latest_subject_id)
                             deleted_count = subjects_to_delete.count()
 
                             print(f"Usunięto {deleted_count} duplikatów dla przedmiotu: {item['subject']}")
