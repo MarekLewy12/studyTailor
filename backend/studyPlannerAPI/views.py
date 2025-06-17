@@ -265,16 +265,20 @@ def get_subjects(request):
         needs_update = False  # Domyślnie nie aktualizuj
         if last_update and isinstance(last_update, datetime):
             try:
-                # Użyj timezone.now() do porównania
-                needs_update = (timezone.now() - last_update > timedelta(days=1))
+                # Skrócenie cache do 12 godzin dla częstszych aktualizacji
+                time_since_update = timezone.now() - last_update
+                needs_update = (time_since_update > timedelta(hours=12))
+                print(f"[DEBUG] Ostatnia aktualizacja: {last_update}, czas od aktualizacji: {time_since_update}, wymaga aktualizacji: {needs_update}")
             except TypeError as e:
                 print(
                     f"Błąd podczas porównywania dat: {e}. last_update={last_update}, typ={type(last_update)}")
                 needs_update = True
         else:
+            print(f"[DEBUG] Brak ostatniej aktualizacji dla użytkownika {user.username}")
             needs_update = True
 
         needs_update = force_refresh or not has_subjects or needs_update
+        print(f"[DEBUG] Finalna decyzja o aktualizacji: {needs_update} (force_refresh={force_refresh}, has_subjects={has_subjects})")
 
         if needs_update:
             try:
@@ -283,6 +287,12 @@ def get_subjects(request):
                 schedule_data = planner.get_schedule(user.album_number)
 
                 if schedule_data:
+                    print(f"[DEBUG] Pobrano {len(schedule_data)} przedmiotów z API uniwersytetu")
+                    if schedule_data:
+                        first_date = min(item['start_datetime'] for item in schedule_data)
+                        last_date = max(item['start_datetime'] for item in schedule_data)
+                        print(f"[DEBUG] Zakres dat: od {first_date.strftime('%Y-%m-%d')} do {last_date.strftime('%Y-%m-%d')}")
+                    
                     preserved_ids = []
 
                     for item in schedule_data:
@@ -319,7 +329,21 @@ def get_subjects(request):
                 print(f"Błąd podczas pobierania planu zajęć: {e}")
                 print(traceback.format_exc())
 
-        subjects = Subject.objects.filter(user=user).order_by('start_datetime')
+        # Parametr all=true zwraca wszystkie przedmioty, bez tego tylko przyszłe
+        show_all = request.query_params.get('all', 'false').lower() == 'true'
+        
+        if show_all:
+            subjects = Subject.objects.filter(user=user).order_by('start_datetime')
+            print(f"[DEBUG] Zwracam wszystkie {subjects.count()} przedmiotów (parametr all=true)")
+        else:
+            # Filtruj tylko przedmioty z dzisiaj i w przyszłości
+            from django.utils import timezone
+            today = timezone.now().date()
+            subjects = Subject.objects.filter(
+                user=user, 
+                start_datetime__date__gte=today
+            ).order_by('start_datetime')
+            print(f"[DEBUG] Zwracam {subjects.count()} przyszłych przedmiotów (od {today})")
         serializer = SubjectSerializer(subjects, many=True)
 
         # Bezpieczna serializacja last_update
@@ -341,7 +365,9 @@ def get_subjects(request):
             'data': serializer.data,
             'last_update': last_update_iso,
             'refreshed': needs_update,
-            'empty_response': len(subjects) == 0
+            'empty_response': len(subjects) == 0,
+            'show_all': show_all,
+            'total_subjects': subjects.count()
         })
     except Exception as e:
         import traceback

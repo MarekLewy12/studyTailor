@@ -48,11 +48,14 @@ class StudyPlanner:
 
     def get_schedule(self, album_number: str):
         """
-        Pobiera plan zajęć na tydzień do przodu na podstawie numeru albumu z endpointa uczelnianego.
+        Pobiera plan zajęć na 3 tygodnie do przodu na podstawie numeru albumu z endpointa uczelnianego.
         """
-        # od dnia jutrzejszego
-        start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-        end_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+        # od dnia dzisiejszego (aby objąć zajęcia z dzisiaj)
+        start_date = datetime.now().strftime("%Y-%m-%d")
+        # rozszerzenie do 3 tygodni dla lepszego pokrycia
+        end_date = (datetime.now() + timedelta(days=21)).strftime("%Y-%m-%d")
+        
+        print(f"[DEBUG] Pobieranie harmonogramu dla {album_number} od {start_date} do {end_date}")
         params = {"number": album_number, "start": start_date, "end": end_date}
         response = requests.get(self.endpoint, params=params)
         if response.status_code == 200:
