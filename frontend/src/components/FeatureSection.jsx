@@ -7,7 +7,6 @@ import {
   FaChartLine,
 } from "react-icons/fa";
 
-// TODO: Dodaj krótki filmik pokazujący jak działa StudyTailor i jego funkcje
 const FeaturesSection = forwardRef((props, ref) => {
   return (
     <section ref={ref} className="py-20 bg-white dark:bg-gray-900">
@@ -114,8 +113,38 @@ const FeaturesSection = forwardRef((props, ref) => {
             viewport={{ once: true }}
             className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl overflow-hidden shadow-xl relative"
           >
-            <p>Tutaj pokażemy nagrany filmik</p>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end"></div>
+            <div className="p-8 md:p-10 h-full flex flex-col justify-center">
+              <span className="text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300 mb-4">
+                Bez zbędnych dodatków
+              </span>
+              <h4 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Gotowe do działania od pierwszego dnia
+              </h4>
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
+                Bez wdrożenia i bez dodatkowych narzędzi. Otwierasz aplikację i
+                uczysz się od razu.
+              </p>
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-start">
+                  <span className="text-indigo-600 dark:text-indigo-300 mr-2">
+                    •
+                  </span>
+                  Plan zajęć i terminy w jednym miejscu
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-600 dark:text-indigo-300 mr-2">
+                    •
+                  </span>
+                  Materiały, notatki i zadania zawsze pod ręką
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-600 dark:text-indigo-300 mr-2">
+                    •
+                  </span>
+                  Inteligentne wsparcie podczas nauki i powtórek
+                </li>
+              </ul>
+            </div>
           </motion.div>
         </div>
       </div>
